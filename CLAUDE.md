@@ -8,7 +8,8 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 - **Positionnement** : conseil honnête et direct, clientèle d'investisseurs. Slogan : « vous c'est nous ». Pas de vente émotionnelle, pas de promesse de rendement.
 - **Segments d'audience** : vendeurs, investisseurs, acheteurs, bailleurs.
 - **Trois marques** : AMO Invest (Facebook page + Instagram pro), chaîne tech / IA (YouTube + TikTok), basket (TikTok, matchs de son fils). Ce fichier détaille la charte AMO ; chaque marque aura la sienne dans `brands/<slug>/charte.md`.
-- **Logiciel immobilier** : Hektor. Les annonces sont lues sur le site (pages vente et location) puis, plus tard, par la passerelle Hektor.
+- **Logiciel immobilier** : Hektor. Les annonces d'amoinvest.fr (pages vente et location) sont lues par une fonction Netlify planifiée vers la table `listings` ; plus tard, par la passerelle Hektor.
+- **Chaque post enregistre ses caractéristiques** (`posts.features` : accroche, durée, sujet, format, présentateur, CTA) pour l'analyse. Lire `brands/<slug>/learnings.md` avant de créer.
 - **Olivier ne veut pas apparaître à l'écran** : présentateur virtuel Higgsfield, voix ElevenLabs, écran des applis au centre.
 - **Olivier est débutant en code** : explique chaque commande, livre des fichiers copiables, une étape à la fois. Jamais de jargon sans traduction.
 
@@ -33,7 +34,7 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 | Stockage | Supabase, projet dédié | `brands`, `posts`, `listings`, `inbox`, `matches`, `tokens` + buckets `visuels`, `videos`, `raw` |
 | Validation | Mail Gmail → tableau de bord privé Netlify | Valider / Refuser / Modifier, Copier, Télécharger, Déposer |
 | Publication | Fonctions Netlify : API Meta, API YouTube, brouillon TikTok | Jamais Claude en direct. n8n et Postiz écartés |
-| Stats | Windsor.ai (MCP) | Phase 7 |
+| Stats et apprentissage | Routine `analytics` via Windsor.ai → `metrics` ; `posts.features` ; `brands/<slug>/learnings.md` | Lu par le stratège à chaque création. Un test par semaine |
 
 Stack déjà chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, Higgsfield. MCP disponibles : Gmail, Google Calendar, Supabase, Netlify, Canva, ElevenLabs, Higgsfield, Windsor.ai, Stripe, Microsoft 365.
 

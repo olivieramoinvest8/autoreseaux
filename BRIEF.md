@@ -7,7 +7,8 @@ Ce fichier est la source de vérité du projet. Lis-le en entier avant toute act
 - Positionnement : conseil honnête et direct, clientèle investisseurs, slogan « vous c'est nous ». Pas de vente émotionnelle, pas de promesse de rendement.
 - Segments d'audience AMO : vendeurs, investisseurs, acheteurs, bailleurs.
 - Trois marques : **AMO Invest** (Facebook page + Instagram pro), **chaîne tech / IA** (YouTube + TikTok, nom à choisir), **basket** (TikTok, résumés des matchs de son fils).
-- Logiciel immobilier : Hektor (La Boîte Immo). Site AMO Invest avec deux pages à lire : vente et location. Refonte du site prévue.
+- Logiciel immobilier : Hektor (La Boîte Immo). Site : amoinvest.fr, deux pages à lire (vente, location) par une fonction Netlify planifiée. Refonte du site prévue.
+- Compte TikTok basket au nom d'Olivier (son fils a 14 ans et n'a pas TikTok). Prénom seul, jamais de nom de famille.
 - Olivier est débutant en code : explique chaque commande, livre des fichiers copiables, une étape à la fois.
 
 ## 2. Objectif
@@ -29,7 +30,7 @@ Ce fichier est la source de vérité du projet. Lis-le en entier avant toute act
 | Stockage | Supabase, projet dédié | Tables `brands`, `posts`, `listings`, `inbox`, `matches`, `tokens` + buckets `visuels`, `videos`, `raw` |
 | Validation | Mail Gmail « un post est prêt » → tableau de bord privé Netlify (téléphone) | Valider / Refuser / Modifier, Copier le texte, Télécharger, Déposer (info, match, enregistrement) |
 | Publication | Fonctions Netlify : API Meta (FB + IG), API YouTube, brouillon TikTok dans l'appli | Claude ne publie jamais directement. 0 € d'abonnement. n8n et Postiz écartés |
-| Stats | Windsor.ai (MCP) | Lecture des performances, ajustement du calendrier (phase 7) |
+| Stats et apprentissage | Routine `analytics` (lundi 9h) via Windsor.ai → table `metrics` ; `posts.features` ; `brands/<slug>/learnings.md` lu par le stratège | Onglet Performances du tableau de bord, mail hebdomadaire, un test par semaine |
 
 Stack déjà en place chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, Higgsfield. Connecteurs MCP disponibles : Gmail, Google Calendar, Supabase, Netlify, Canva, ElevenLabs, Higgsfield, Windsor.ai, Stripe, Microsoft 365.
 
@@ -91,7 +92,7 @@ amo-social-bot/
 4. **Routine AMO image** : création, run manuel, une semaine d'observation.
 5. **Vidéo** : GitHub Actions, Remotion, voix ElevenLabs, présentateur Higgsfield, chaîne tech puis AMO 18h.
 6. **Basket** : dépôt de match dans le tableau de bord, montage automatique, brouillon TikTok.
-7. **Stats et autonomie** : Windsor.ai, passerelle Hektor avec la refonte du site, publication par défaut après X semaines sans refus.
+7. **Analyse et apprentissage** : routine `analytics`, table `metrics`, `learnings.md` par marque, onglet Performances, mail hebdomadaire. Puis passerelle Hektor avec la refonte du site, et publication par défaut après X semaines sans refus.
 
 ## 9. Première tâche pour Claude Code
 Exécuter la phase 2 : initialiser le repo `amo-social-bot` avec la structure du §6, écrire `CLAUDE.md` à partir des §1, §3, §7, créer `templates/post-feed.html` (charte AMO : bleu marine, typographie sobre, logo en bas) et `render/render-image.js`. Produire un premier PNG de test à partir d'un texte d'exemple. Ne pas toucher aux réseaux sociaux à cette étape.
@@ -103,5 +104,5 @@ Encore ouvertes :
 - Adresse du site AMO Invest (à fournir).
 - Nom de la chaîne tech.
 - Compte TikTok basket : titulaire, âge, accord du club.
-- Voix : clone ElevenLabs de la voix d'Olivier (selon plan) ou voix choisie.
+- Voix : ElevenLabs reste la voix du pipeline (narration, horodatages des sous-titres, clone si plan payant). Plan d'Olivier à confirmer.
 - Passage au 100 % automatique après X semaines sans refus.

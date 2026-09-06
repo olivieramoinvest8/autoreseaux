@@ -251,3 +251,53 @@ Plus besoin de : Postiz ou tout abonnement de publication, compte n8n.
 - Metricool : https://tygartmedia.com/metricool-api-guide/
 - TikTok Content Posting API : https://developers.tiktok.com/docs/en/content-sharing-guidelines
 - n8n : https://n8n.io/pricing
+
+## 12. Compléments du 6 septembre (soir)
+
+### 12.1 Site AMO Invest : amoinvest.fr
+Structure observée : listes paginées `amoinvest.fr/location/1`, `/location/2`… (et `/vente/1`…), fiches `amoinvest.fr/location/<ville>/<type>/<id>-<titre>`. Le lecteur parcourt les listes, suit chaque fiche pour prix, honoraires, DPE, GES, surface, ville, photos, et calcule une empreinte par bien pour détecter les changements. Pages à lire : vente et location. Le lecteur ne tourne pas dans la routine Claude (dont le réseau sortant est restreint) mais dans une **fonction Netlify planifiée** chaque matin à 9h, qui écrit dans `listings`. La routine ne lit que Supabase. Cela rend la lecture indépendante des réglages réseau des routines et permet de la tester à la main depuis le tableau de bord (« Relire le site maintenant »).
+
+### 12.2 Voix : ElevenLabs reste utile avec Higgsfield
+Higgsfield intègre des voix ElevenLabs et accepte un fichier audio pour la synchronisation labiale. Mais trois choses restent du côté ElevenLabs :
+1. **La narration automatisée** : les 4 à 6 minutes de voix sur l'écran des applis sont produites par le connecteur ElevenLabs dans le pipeline, sans intervention humaine.
+2. **Les horodatages** : ElevenLabs renvoie le timing de chaque mot, ce qui fabrique les sous-titres sans transcription.
+3. **Le clone de votre voix**, si votre plan le permet.
+Le flux : ElevenLabs produit l'audio → Higgsfield fait parler le présentateur virtuel sur cet audio (intro, conclusion) → Remotion assemble. Une seule voix partout. Besoin mensuel : ≈ 60 minutes d'audio (3 vidéos de 5 min par semaine, plus les extraits). L'offre gratuite ElevenLabs (10 min/mois) ne suffit pas ; un plan payant est nécessaire, ou, à vérifier en phase 5, la synthèse vocale de Higgsfield si son API l'expose.
+
+### 12.3 Comptes : ce qu'Olivier fournit
+Règle : **jamais de mot de passe dans une conversation.** Ce qui circule, ce sont des clés d'API et des jetons, déposés dans les variables d'environnement Netlify et dans les connecteurs des routines. Je vous indique où trouver chaque valeur au moment de la configuration.
+
+| # | Compte | Statut | Ce que vous faites | Ce que vous me donnez |
+|---|---|---|---|---|
+| 1 | Page Facebook AMO Invest | Existe | Vérifier que vous êtes administrateur | Nom de la page |
+| 2 | Instagram AMO Invest | Existe | Passer en compte professionnel, lier à la page Facebook | Identifiant Instagram |
+| 3 | Application Meta (developers.facebook.com) | À créer | Créer l'app, ajouter Facebook Login et Instagram Graph API, générer un jeton de page longue durée (guidé, 30 min) | App ID, App Secret, jeton de page : dans les secrets |
+| 4 | Chaîne YouTube tech | À créer | Créer une chaîne de marque sous votre compte Google | Nom de la chaîne |
+| 5 | Projet Google Cloud | À créer | Activer YouTube Data API v3, écran de consentement, identifiant OAuth, autoriser la chaîne (guidé, 20 min) | Client ID, Client Secret, refresh token : dans les secrets |
+| 6 | Compte TikTok tech | À créer | Créer le compte, e-mail dédié | Identifiant TikTok |
+| 7 | Compte TikTok basket | À créer, à votre nom (votre fils a 14 ans et n'a pas TikTok) | Créer le compte, régler la confidentialité et les commentaires | Identifiant TikTok |
+| 8 | Application TikTok (developers.tiktok.com) | À créer | Créer l'app, activer Content Posting API, connecter les deux comptes | Client Key, Client Secret, jetons : dans les secrets |
+| 9 | Supabase | Existe | Créer le projet « social-bot », exécuter `supabase/schema.sql` | URL du projet, clé service : dans les secrets |
+| 10 | Netlify | Existe | Créer le site depuis ce dépôt | Rien : je déploie via le connecteur |
+| 11 | GitHub | Existe | Rien | Rien : déjà connecté |
+| 12 | Gmail | Existe, connecté | Choisir l'adresse qui reçoit « un post est prêt » | L'adresse |
+| 13 | ElevenLabs | Existe, connecté | Me dire votre plan ; enregistrer 30 min de lecture si clone possible | Le plan, l'enregistrement |
+| 14 | Higgsfield | Pris, connecté | Créer le présentateur virtuel avec moi (Soul ID) | Rien de plus |
+| 15 | Windsor.ai | Existe, connecté | Connecter les sources : Facebook, Instagram, YouTube, TikTok (les trois marques) | Rien de plus |
+| 16 | Hektor | Existe | Plus tard, avec la refonte : créer la passerelle vers le FTP Railway | Rien pour l'instant |
+| 17 | Railway | Existe | Plus tard : serveur FTP pour la passerelle | Rien pour l'instant |
+
+Compte basket : titulaire Olivier, fils de 14 ans. Le compte est au nom d'un adulte, ce qui est conforme. Prénom seul, jamais de nom de famille ni d'établissement scolaire, et accord du club pour les autres joueurs à l'image.
+
+### 12.4 Analyse des vidéos et boucle d'amélioration
+Objectif : savoir ce qui marche, et que chaque vidéo profite des précédentes.
+
+**Collecte.** Une routine `analytics` le lundi à 9h (et le jeudi pour les vidéos de la semaine) lit les performances via Windsor.ai, déjà connecté, qui couvre Facebook, Instagram, YouTube et TikTok organiques. Pour chaque post publié : vues, durée moyenne de visionnage et pourcentage regardé, rétention à 3 s et à 50 %, likes, commentaires, partages, enregistrements, nouveaux abonnés, clics sur le lien (AMO). Écrit dans la table `metrics` à J+2, J+7 et J+28.
+
+**Caractéristiques de chaque vidéo**, enregistrées au moment de la création dans `posts.features` : type d'accroche (question, chiffre, promesse, démonstration), durée, sujet, segment, format (longue, extrait, data card), présence du présentateur, position de l'appel à l'action, heure de publication, musique ou non, longueur du titre.
+
+**Apprentissage.** La routine croise `metrics` et `features` et met à jour `brands/<slug>/learnings.md` : les trois accroches qui retiennent le mieux, la durée idéale par réseau, les sujets qui font s'abonner, ce qui fait décrocher à 3 s. Ce fichier est lu par le stratège à chaque création. Une variable à la fois : chaque semaine, la routine propose un test (par exemple accroche question contre accroche chiffre) et le tranche la semaine suivante.
+
+**Restitution.** Un onglet « Performances » dans le tableau de bord (classement des vidéos, courbes par réseau, tests en cours et conclusions) et un mail hebdomadaire le lundi : trois chiffres, trois enseignements, le test de la semaine.
+
+**Limites honnêtes.** Il faut une trentaine de vidéos avant de tirer des conclusions solides ; avant cela, les enseignements sont indicatifs. Windsor.ai a ses propres limites de plan ; si TikTok n'y remonte pas, la fonction Netlify lira l'API TikTok Display, ouverte aux comptes connectés.
