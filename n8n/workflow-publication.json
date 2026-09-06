@@ -1,0 +1,8 @@
+{
+  "_doc": "PHASE 4 — squelette à importer dans n8n puis à compléter. Flux : webhook {post_id} → lecture Supabase → mail Gmail avec aperçu et liens Valider/Refuser → attente → publication Facebook/Instagram/YouTube → mise à jour posts.",
+  "name": "AMO Social — validation et publication",
+  "nodes": [],
+  "connections": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

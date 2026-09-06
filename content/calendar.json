@@ -1,0 +1,19 @@
+{
+  "_doc": "Calendrier éditorial hebdomadaire. Chaque jour : segment prioritaire et angles possibles par créneau. La routine choisit un angle non traité dans les 14 derniers jours (vérifier la table posts). 0 = dimanche, pas de publication.",
+  "segments": ["vendeurs", "investisseurs", "acheteurs", "bailleurs"],
+  "semaine": {
+    "1": { "jour": "lundi",    "segment": "investisseurs", "11h": ["calcul de rendement réel", "fiscalité locative expliquée simplement", "erreurs classiques du premier investissement"], "18h": ["démo outil : estimateur DVF", "data card : un chiffre du marché local"] },
+    "2": { "jour": "mardi",    "segment": "vendeurs",      "11h": ["prix juste vs prix espéré", "diagnostics obligatoires avant vente", "préparer une visite"], "18h": ["démo outil : fiche-visite", "voix off : les étapes d'une vente"] },
+    "3": { "jour": "mercredi", "segment": "acheteurs",     "11h": ["budget global d'un achat (frais inclus)", "lire un DPE", "compromis : ce qu'il faut vérifier"], "18h": ["data card : taux et capacité d'emprunt", "démo outil : simulateur de mensualité"] },
+    "4": { "jour": "jeudi",    "segment": "bailleurs",     "11h": ["gestion locative : ce que ça couvre", "loyer et encadrement", "impayés : prévenir plutôt que subir"], "18h": ["voix off : mise en location pas à pas", "data card : coût réel d'une vacance locative"] },
+    "5": { "jour": "vendredi", "segment": "investisseurs", "11h": ["actualité fiscale ou réglementaire de la semaine", "cas concret anonymisé", "question fréquente d'investisseur"], "18h": ["démo outil au choix", "récap actualité en 45 s"] },
+    "6": { "jour": "samedi",   "segment": "acheteurs",     "11h": ["vivre à Graveson et alentour", "coulisses de l'agence, sans vente", "conseil pratique du week-end"], "18h": ["scène locale ou B-roll Provence + conseil", "data card légère"] },
+    "0": { "jour": "dimanche", "segment": null, "11h": [], "18h": [] }
+  },
+  "regles": {
+    "rotation_theme_jours": 14,
+    "posts_a_relire": 30,
+    "reseaux_image": ["facebook", "instagram"],
+    "reseaux_video": ["instagram", "tiktok", "youtube"]
+  }
+}

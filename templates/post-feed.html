@@ -1,0 +1,152 @@
+<!--
+  templates/post-feed.html — Visuel de post "feed" AMO Invest, 1080×1350 (format 4:5).
+  Rempli par render/render-image.js : chaque {{cle}} est remplacé par la valeur du JSON
+  de données, et tout élément portant data-if="cle" est supprimé si la valeur est vide.
+
+  Clés attendues :
+    segment      libellé court en haut (ex. "Investisseurs", "Vendeurs")
+    title        accroche principale (2 à 3 lignes maximum, majuscules automatiques)
+    body         texte pédagogique (2 à 4 phrases). Les sauts de ligne sont conservés.
+    figure       chiffre-clé optionnel (ex. "3,2 %")
+    figure_label légende du chiffre (ex. "taux moyen sur 20 ans")
+    cta          appel à l'action sobre (ex. "Parlons-en")
+    localisation texte du bas à droite (ex. "Graveson · Bouches-du-Rhône")
+    bg_image     chemin ou URL d'une image de fond optionnelle (assombrie par un voile bleu)
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — post feed</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 400; src: url("../assets/fonts/oswald-400.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+
+  :root {
+    --navy: #2E358D;
+    --navy-deep: #1E2464;
+    --gold: #E9CA31;
+    --gold-dark: #E0B21F;
+    --white: #FFFFFF;
+    --pad: 84px;
+    --footer-h: 210px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body {
+    position: relative;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color: var(--white);
+    font-family: "Inter", "Liberation Sans", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Image de fond optionnelle, voilée de bleu pour garder le texte lisible */
+  .bg {
+    position: absolute; inset: 0;
+    background-image: url("{{bg_image}}");
+    background-size: cover; background-position: center;
+  }
+  .bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(46,53,141,.82) 0%, rgba(30,36,100,.94) 100%);
+  }
+
+  /* Diagonales signature : bande étroite à droite, du haut (x≈1000) au cartouche (x≈720).
+     Le texte est limité à 740px de large pour ne jamais la croiser. */
+  .diag { position: absolute; inset: 0; bottom: var(--footer-h); pointer-events: none; }
+  .diag .gold  { position: absolute; inset: 0; background: var(--gold);
+    clip-path: polygon(1010px 0, 1036px 0, 826px 100%, 800px 100%); }
+  .diag .white { position: absolute; inset: 0; background: rgba(255,255,255,.35);
+    clip-path: polygon(1054px 0, 1066px 0, 856px 100%, 844px 100%); }
+
+  .content {
+    position: absolute; left: 0; right: 0; top: 0; bottom: var(--footer-h);
+    padding: var(--pad) var(--pad) 0 var(--pad);
+    display: flex; flex-direction: column;
+  }
+
+  .kicker {
+    display: flex; align-items: center; gap: 18px;
+    font-family: "Oswald", "Liberation Sans Narrow", "Arial Narrow", sans-serif;
+    font-weight: 500; font-size: 30px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .kicker::before { content: ""; width: 56px; height: 4px; background: var(--gold); }
+
+  h1 {
+    margin-top: 44px;
+    font-family: "Oswald", "Liberation Sans Narrow", "Arial Narrow", sans-serif;
+    font-weight: 700; font-size: 92px; line-height: 1.02;
+    text-transform: uppercase; letter-spacing: .01em;
+    max-width: 740px;
+  }
+
+  .figure { margin-top: 48px; display: flex; align-items: baseline; gap: 22px; }
+  .figure .num {
+    font-family: "Oswald", sans-serif; font-weight: 700; font-size: 150px; line-height: 1;
+    color: var(--gold); text-shadow: 0 6px 0 var(--gold-dark);
+  }
+  .figure .label { font-size: 34px; font-weight: 600; max-width: 440px; line-height: 1.2; color: rgba(255,255,255,.92); }
+
+  .body {
+    margin-top: 44px;
+    font-size: 36px; line-height: 1.42; font-weight: 400;
+    color: rgba(255,255,255,.92);
+    max-width: 740px;
+    white-space: pre-line;
+  }
+
+  .cta {
+    margin-top: auto; margin-bottom: 56px;
+    display: inline-flex; align-items: center; gap: 20px; align-self: flex-start;
+    font-family: "Oswald", sans-serif; font-weight: 500; font-size: 38px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--navy-deep); background: var(--gold);
+    padding: 18px 40px; border-radius: 8px;
+    box-shadow: 0 6px 0 var(--gold-dark);
+  }
+
+  /* Cartouche blanc du bas : logo officiel + localisation */
+  .footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: var(--footer-h);
+    background: var(--white); color: var(--navy);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--pad);
+  }
+  .footer img { height: 160px; width: auto; display: block; }
+  .footer .right { text-align: right; }
+  .footer .loc {
+    font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .12em; text-transform: uppercase;
+  }
+  .footer .slogan { margin-top: 8px; font-size: 26px; font-weight: 600; color: var(--gold-dark); }
+</style>
+</head>
+<body>
+  <div class="bg" data-if="bg_image"></div>
+  <div class="diag"><div class="gold"></div><div class="white"></div></div>
+
+  <main class="content">
+    <div class="kicker" data-if="segment">{{segment}}</div>
+    <h1>{{title}}</h1>
+    <div class="figure" data-if="figure">
+      <div class="num">{{figure}}</div>
+      <div class="label">{{figure_label}}</div>
+    </div>
+    <p class="body" data-if="body">{{body}}</p>
+    <div class="cta" data-if="cta">{{cta}} →</div>
+  </main>
+
+  <footer class="footer">
+    <img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière">
+    <div class="right">
+      <div class="loc">{{localisation}}</div>
+      <div class="slogan">« vous c'est nous »</div>
+    </div>
+  </footer>
+</body>
+</html>

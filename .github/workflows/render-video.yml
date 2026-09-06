@@ -1,0 +1,20 @@
+# PHASE 6 — Rendu vidéo. Déclenchement manuel uniquement pour l'instant : rien ne tourne automatiquement.
+name: render-video
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Chemin du scenario.json à rendre"
+        required: true
+        default: "content/runs/exemple/scenario.json"
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Rendu (à implémenter en phase 6)
+        run: echo "Rendu vidéo non implémenté. Scénario demandé : ${{ github.event.inputs.scenario }}"
