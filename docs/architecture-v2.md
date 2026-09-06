@@ -1,6 +1,6 @@
-# Architecture v2 — un robot, trois marques
+# Architecture v2.1 — un robot, trois marques, 0 € de plus
 
-Proposition d'architecture pour rendre la publication autonome sur trois marques, avec une seule action humaine : ouvrir un mail et cliquer « Valider ». Ce document sert à choisir. Une fois les décisions prises (§8), `BRIEF.md` et `CLAUDE.md` seront mis à jour.
+Architecture retenue le 6 septembre 2026 après discussion avec Olivier. Trois décisions ont modifié la v2 : publication **hybride gratuite** (APIs Meta et YouTube, brouillon TikTok) au lieu d'un abonnement Postiz ; **Hektor et le site** comme source des annonces AMO ; **Higgsfield** pour les images, les plans d'illustration et un présentateur virtuel. `BRIEF.md` et `CLAUDE.md` reflètent cette version.
 
 ## 1. Les trois marques
 
@@ -28,14 +28,16 @@ Fabrique d'assets
 Supabase : media dans un bucket public, ligne `posts` en statut draft
    │
    ▼
-Mail d'aperçu (Gmail) : visuel + textes par réseau + boutons Valider / Refuser
-   │
-   ▼  clic « Valider »
-Fonction Netlify : passe le post en approved, appelle l'API de l'outil de publication
+Mail (Gmail) : « un post est prêt » + lien vers le tableau de bord
    │
    ▼
-Outil de publication (Postiz ou équivalent) → Facebook, Instagram, YouTube, TikTok
-   │
+Tableau de bord privé (site Netlify, utilisable au téléphone) : aperçu, textes par réseau,
+   │  boutons Valider / Refuser / Modifier, Copier le texte, Télécharger
+   ▼  clic « Valider »
+Fonction Netlify : passe le post en approved puis publie
+   │  Facebook + Instagram : API Meta (votre application, mode développement)
+   │  YouTube : API YouTube Data (votre projet Google)
+   │  TikTok : envoi du brouillon dans votre appli TikTok, vous ajoutez le son et publiez
    ▼
 Retour : `posts` passe en published avec les identifiants ; stats lues via Windsor.ai
 ```
@@ -43,7 +45,7 @@ Retour : `posts` passe en published avec les identifiants ; stats lues via Winds
 Trois principes :
 - **Claude ne publie jamais directement.** Il prépare, et c'est la fonction Netlify, après votre clic, qui déclenche l'outil de publication.
 - **Un seul point de validation** : le mail. Pas d'interface à ouvrir, pas d'application à installer.
-- **Un seul outil de publication pour tous les réseaux et toutes les marques.** C'est lui qui porte les connexions aux plateformes.
+- **Zéro abonnement de plus.** Les APIs officielles de Meta et de Google sont gratuites pour vos propres comptes. TikTok reste le seul geste manuel, et c'est le réseau où c'est le mieux ainsi (choix de la musique dans l'appli).
 
 ## 3. Publication : toutes les options
 
@@ -63,7 +65,11 @@ Les outils de programmation (« schedulers ») ont déjà passé ces audits. Vou
 | **APIs directes** (Meta, Google, TikTok) | FB, IG, YouTube ; TikTok privé seulement | 0 € | — | Gratuit, contrôle total | Trois applications développeur à créer, audit TikTok, jetons à renouveler, code à maintenir |
 | **Brouillon TikTok** (envoi dans l'appli) | TikTok seulement | 0 € | — | Autorisé sans audit | Vous publiez à la main depuis le téléphone |
 
-**Recommandation : Postiz cloud, plan Standard.** Zernio si le budget prime ; les deux ont un essai gratuit, on peut tester les deux la même semaine. Les APIs directes restent une option de repli pour Facebook/Instagram uniquement.
+**Décision : hybride gratuit.** Facebook et Instagram par l'API Meta, YouTube par l'API YouTube Data, TikTok en brouillon envoyé dans l'appli. Ce qu'il faut savoir :
+- **Meta** : une application en mode développement peut publier sur les pages et comptes dont vous êtes administrateur, sans passer par la validation Meta. Il faut un compte Instagram professionnel lié à la page Facebook. Le jeton longue durée se renouvelle tous les 60 jours ; la fonction Netlify s'en charge et vous prévient par mail si le renouvellement échoue.
+- **YouTube** : un projet Google Cloud avec écran de consentement OAuth. Pour votre propre chaîne, il fonctionne sans vérification Google, avec un avertissement à la première connexion. Quota gratuit : 6 mises en ligne par jour environ, largement suffisant.
+- **TikTok** : sans audit, l'API ne peut publier qu'en privé. En revanche, elle peut déposer la vidéo dans votre boîte de brouillons TikTok (« inbox upload »). Vous ouvrez l'appli, ajoutez un son, publiez : 30 secondes par vidéo. Cela vaut pour les deux comptes TikTok (tech et basket).
+- Postiz ou Zernio restent une option si, un jour, le geste TikTok devient pesant.
 
 ## 4. Orchestration et validation : toutes les options
 
@@ -75,9 +81,14 @@ Les outils de programmation (« schedulers ») ont déjà passé ces audits. Vou
 | **Make** | Idem, visuel | ≈ 9 à 16 €/mois | Simple | Facturation à l'opération, moins adapté au code |
 | **Supabase Edge Functions** | Comme Netlify | 0 € | Déjà chez vous | Environnement Deno, moins courant |
 
-**Recommandation : fonctions Netlify, sans n8n.** C'est un changement par rapport au brief initial, justifié par le §3 : une fois les plateformes portées par Postiz, n8n n'apporte plus qu'une interface visuelle. Si vous voulez cette console visuelle plus tard, on pourra la brancher sans rien casser : la fonction Netlify et n8n parlent aux mêmes tables et à la même API.
+**Décision : fonctions Netlify et tableau de bord privé, sans n8n.**
 
-Le mail d'aperçu est envoyé par la routine elle-même via le connecteur Gmail déjà en place. Les boutons sont des liens signés vers la fonction Netlify (un jeton par post, à usage unique, expirant à 48 h).
+Le tableau de bord est un petit site Netlify protégé par mot de passe, pensé pour le téléphone :
+- **Posts prêts** : aperçu du visuel ou de la vidéo, textes par réseau, boutons Valider / Refuser / Modifier le texte, Copier le texte, Télécharger.
+- **Déposer** : une info d'agence (signature notaire, nouveau mandat, événement) avec photo et deux phrases ; un match de basket (clips, adversaire, score) ; un enregistrement (voix, plans).
+- **Historique** : ce qui est parti, où, quand, et les erreurs éventuelles.
+
+Le mail d'aperçu part de la routine via le connecteur Gmail déjà en place et renvoie vers le tableau de bord. Les liens sont signés : un jeton par post, expirant à 48 h.
 
 ## 5. Fabrique d'assets : toutes les options
 
@@ -85,7 +96,7 @@ Le mail d'aperçu est envoyé par la routine elle-même via le connecteur Gmail 
 | Option | Usage | Coût | Verdict |
 |---|---|---|---|
 | **Templates HTML → PNG** (fait) | Base de tous les visuels : sobre, lisible, conforme | 0 € | Socle |
-| **Higgsfield** (MCP déjà connecté) | Image de fond IA optionnelle (Provence, intérieurs génériques), jamais un bien réel | Crédits Higgsfield | À activer en option, avec parcimonie |
+| **Higgsfield** (compte pris, MCP connecté) | Image de fond IA (Provence, intérieurs génériques), jamais un bien réel. Photos réelles des biens sous mandat via Hektor | Crédits Higgsfield | Activé dès la phase 3, avec parcimonie sur AMO |
 | **Canva** (MCP déjà connecté) | Visuels ponctuels retouchés à la main | Votre abonnement | Pour les cas manuels, pas pour la routine |
 | Ideogram, Flux (fal.ai, Replicate) | Générateurs avec texte propre dans l'image | ≈ 0,03 $/image | Inutile tant que les templates suffisent |
 
@@ -96,13 +107,45 @@ Le mail d'aperçu est envoyé par la routine elle-même via le connecteur Gmail 
 | Montage, habillage, sous-titres | Remotion + ffmpeg sur GitHub Actions | 0 € (2 000 min/mois inclus, il en faut ≈ 150) |
 | Voix off | ElevenLabs (MCP déjà connecté) | Votre abonnement |
 | Sous-titres | Générés depuis le script écrit par Claude, calés avec les horodatages ElevenLabs : pas de transcription à payer | 0 € |
-| Plans d'illustration IA | Higgsfield vidéo, en option | Crédits |
+| Plans d'illustration IA | Higgsfield vidéo | Crédits |
+| Présentateur virtuel (chaîne tech) | Higgsfield Speak + Soul ID : un personnage créé une fois, cohérent d'une vidéo à l'autre, qui dit le texte en intro et en conclusion | Crédits |
 | Clips de match (votre fils) | Vous déposez les clips et le score sur une petite page « Déposer un match » (Netlify → bucket Supabase) ; le robot assemble : carte score, clips, titre, générique | 0 € |
 
 Points d'attention vidéo :
 - Une vidéo publiée sur TikTok par API ne peut pas utiliser la bibliothèque musicale TikTok. Soit musique libre de droits ajoutée au montage, soit ajout du son dans l'appli après publication.
 - Pour les clips de basket : d'autres mineurs apparaissent à l'image. Prévoir l'accord du club ou des parents, et ne jamais afficher de nom de famille.
 - Compte TikTok d'un mineur : 13 ans minimum pour publier ; en dessous, le compte est au nom d'un parent.
+
+## 5 bis. Source des annonces AMO Invest : Hektor et le site
+
+Hektor (La Boîte Immo) exporte les annonces par une **passerelle** : un flux XML, CSV ou Poliris déposé plusieurs fois par jour sur un serveur FTP de votre choix, que vous configurez vous-même dans Hektor. Le flux CSV est le plus complet (255 critères : prix, honoraires, DPE, GES, surfaces, photos).
+
+| Option | Comment | Quand |
+|---|---|---|
+| **Lecture du site** (pages vente et location) | La routine lit les deux pages chaque matin et compare avec la veille dans la table `listings` : nouveau bien, changement de prix, sous offre, vendu | **Maintenant.** Aucune infrastructure, fonctionne avec le site actuel |
+| **Passerelle Hektor → FTP → Supabase** | Un petit serveur FTP sur Railway reçoit le flux, un script le charge dans `listings`. Données complètes et photos en haute définition | **Avec la refonte du site**, qui aura besoin du même flux |
+| Dépôt manuel dans le tableau de bord | Vous déposez le bien à la main | Solution de secours |
+
+Contrainte à connaître : la passerelle Hektor n'accepte que le FTP simple, sans chiffrement. Les annonces étant publiques, le risque est faible, et le serveur ne contiendra rien d'autre.
+
+Chaque post d'annonce contient le lien vers la fiche du bien sur votre site, ce qui apporte du trafic. Priorité de la routine AMO chaque matin :
+1. Une info déposée dans le tableau de bord (signature, mandat, événement).
+2. Un changement détecté dans `listings` : nouveau bien, sous offre, vendu, baisse de prix. Template « annonce » avec prix, honoraires, DPE et GES obligatoires, photos du bien sous mandat.
+3. Sinon, création : ancien bien et son histoire (« vendu en 23 jours »), loi ou fiscalité vérifiée, chiffre local sourcé, vie de l'agence.
+
+## 5 ter. Chaîne tech : format et présentateur
+
+Format : **une vidéo longue de 4 à 6 minutes** (horizontale, YouTube), dont sont tirés **3 à 5 extraits de 30 à 60 secondes** complets en eux-mêmes (verticaux, TikTok et YouTube Shorts) avec « la vidéo complète est sur YouTube » à la fin. La longue est aussi publiée telle quelle sur TikTok. Pas de « partie 1/10 » : TikTok montre chaque vidéo à des gens qui n'ont pas vu la précédente. Sous-titres incrustés partout, générés depuis le script.
+
+Présentateur, sachant qu'Olivier ne veut pas se voir à l'écran :
+
+| Option | Pour | Contre |
+|---|---|---|
+| **Présentateur virtuel Higgsfield** (personnage créé, Soul ID, Speak) | Aucune caméra, cohérent, sur une chaîne IA c'est un sujet en soi, déjà dans l'abonnement | Coût en crédits si on l'utilise sur toute la vidéo ; à réserver à l'intro et à la conclusion |
+| Avatar à votre image (Higgsfield ou HeyGen) | Plus personnel | Vous vous voyez quand même ; demande une captation |
+| Sans visage (écran + voix + sous-titres animés) | Le plus simple, très courant sur les chaînes tech | Moins incarné |
+
+**Décision : sans visage par défaut, présentateur virtuel en intro et conclusion (5 à 10 s), l'écran de vos applis au centre.** Voix : clone ElevenLabs de votre voix si votre plan le permet, sinon une voix ElevenLabs choisie ensemble. YouTube et TikTok demandent de signaler le contenu synthétique : case à cocher à la publication et ligne dans la description, intégrées aux textes.
 
 ## 6. Déclencheurs : Routines Claude Code
 
@@ -114,16 +157,20 @@ Une routine par marque et par créneau, chacune avec ses connecteurs (GitHub, Su
 | amo-video | `3 17 * * 1-6` | Scénario + rendu vidéo AMO (phase 5) |
 | tech-video | `3 17 * * 1,3,5` | Vidéo chaîne tech |
 | basket-match | `0 19 * * *` | Regarde s'il y a un nouveau match déposé ; s'il y en a un, monte et propose |
+| amo-listings | intégré à amo-image | Lit les pages vente et location du site, met à jour `listings`, signale les changements |
 
 Une routine qui échoue n'empêche pas les autres. Chaque routine relit les 30 derniers posts de sa marque pour éviter les redites.
 
 ## 7. Données et dépôt
 
 Supabase, projet dédié « social-bot » (gratuit) :
-- `brands` : id, slug, nom, réseaux, e-mail de validation, identifiants des canaux chez Postiz.
-- `posts` : comme aujourd'hui, plus `brand_id`, `approval_token`, `scheduler_post_id`.
+- `brands` : id, slug, nom, réseaux, e-mail de validation, identifiants des pages et chaînes.
+- `posts` : comme aujourd'hui, plus `brand_id`, `approval_token`, `listing_id`.
+- `listings` (AMO) : référence Hektor ou URL, type (vente/location), prix, honoraires, DPE, GES, surface, ville, photos, statut (disponible, sous offre, vendu, loué), empreinte pour détecter les changements, dates.
+- `inbox` : ce que vous déposez (info d'agence, match, enregistrement), avec fichiers et statut.
 - `matches` (basket) : date, adversaire, score, clips déposés, statut.
-- Buckets : `visuels`, `videos` (publics), `raw` (privé, clips bruts).
+- `tokens` : jetons Meta et Google chiffrés, dates d'expiration.
+- Buckets : `visuels`, `videos` (publics), `raw` (privé : clips bruts, voix, dépôts).
 
 Dépôt :
 ```
@@ -133,9 +180,9 @@ brands/
   basket/         charte.md, templates/
 render/           commun : render-image.js, remotion/, assemble.sh
 netlify/
-  functions/      approve.js, reject.js, publish.js, upload-match.js
-  site/           page « Déposer un match »
-scripts/          publish-to-supabase.js, create-scheduler-post.js
+  functions/      approve.js, reject.js, publish-meta.js, publish-youtube.js, tiktok-inbox.js, refresh-tokens.js, inbox-upload.js
+  site/           tableau de bord : posts prêts, déposer, historique
+scripts/          publish-to-supabase.js, read-listings.js
 supabase/         schema.sql (v2)
 ```
 
@@ -143,13 +190,15 @@ supabase/         schema.sql (v2)
 
 | # | Décision | Recommandation |
 |---|---|---|
-| 1 | Outil de publication | **Postiz Standard** (29 $/mois). Alternative : Zernio (≈ 18 $). Tester les deux en essai gratuit. |
-| 2 | Orchestration | **Fonctions Netlify**, pas de n8n pour l'instant. |
-| 3 | Nom et cadence de la chaîne tech | À choisir. Proposition : 3 Shorts par semaine, 45 à 60 s, un outil ou une astuce par vidéo. |
-| 4 | Compte TikTok basket | Qui en est titulaire, âge de votre fils, règle sur la musique, accord du club. |
-| 5 | Images IA en fond des visuels AMO | **Non au départ**, on active Higgsfield après deux semaines de posts sobres. |
-| 6 | Projet Supabase | **Nouveau projet dédié**, gratuit, séparé de vos applications. |
+| 1 | Publication | **Décidé : hybride gratuit.** API Meta (FB + IG), API YouTube, brouillon TikTok dans l'appli. |
+| 2 | Orchestration | **Décidé : fonctions Netlify + tableau de bord privé**, pas de n8n. |
+| 3 | Chaîne tech | **Décidé : longue de 4 à 6 min + 3 à 5 extraits.** Nom de chaîne encore à choisir. |
+| 4 | Compte TikTok basket | À préciser : titulaire, âge de votre fils, accord du club. Musique ajoutée dans l'appli. |
+| 5 | Images IA | **Décidé : Higgsfield**, fonds de visuels et plans d'illustration, avec parcimonie sur AMO. |
+| 6 | Projet Supabase | Nouveau projet dédié, gratuit, séparé de vos applications. |
 | 7 | Adresse de validation | Une seule adresse Gmail pour les trois marques, avec un libellé par marque. |
+| 8 | Source des annonces | **Décidé : lecture du site maintenant, passerelle Hektor avec la refonte du site.** Adresse du site à me donner. |
+| 9 | Présentateur | **Décidé : présentateur virtuel Higgsfield en intro et conclusion, écran au centre.** Voix : à confirmer selon votre plan ElevenLabs. |
 
 ## 9. Comptes à créer et à connecter
 
@@ -159,37 +208,43 @@ Déjà en place : GitHub, Supabase, Netlify, Railway, Canva, ElevenLabs, Higgsfi
 1. **Instagram AMO Invest** : vérifier que le compte est « professionnel » et lié à la page Facebook.
 2. **Chaîne YouTube tech** : créer une chaîne de marque sous votre compte Google.
 3. **Compte TikTok tech** et **compte TikTok basket**.
-4. **Postiz** : créer le compte (essai), connecter les 5 canaux, copier la clé API dans les secrets (jamais dans le dépôt).
-5. **Supabase** : créer le projet « social-bot », exécuter `supabase/schema.sql`, copier l'URL et la clé service dans les secrets.
-6. **Netlify** : créer un site depuis ce dépôt, renseigner les variables d'environnement.
-7. **Routines Claude Code** : les créer avec les connecteurs listés au §6 (je vous guide pas à pas).
+4. **Application Meta** (developers.facebook.com) : créer une application « Business », ajouter les produits Facebook Login et Instagram Graph API, générer un jeton de page longue durée. Je vous guide écran par écran ; comptez 30 minutes. Aucune validation Meta à attendre.
+5. **Projet Google Cloud** : activer l'API YouTube Data v3, créer un écran de consentement et un identifiant OAuth, autoriser votre chaîne une fois. 20 minutes.
+6. **Application TikTok** (developers.tiktok.com) : créer l'application, activer le produit Content Posting API en mode « inbox ». Utilisable sans audit pour vos propres comptes.
+7. **Supabase** : créer le projet « social-bot », exécuter `supabase/schema.sql`, copier l'URL et la clé service dans les secrets.
+8. **Netlify** : créer un site depuis ce dépôt (tableau de bord + fonctions), renseigner les variables d'environnement.
+9. **Routines Claude Code** : les créer avec les connecteurs listés au §6 (je vous guide pas à pas).
+10. **Enregistrements** : 30 minutes de lecture pour le clone de voix (texte fourni), si votre plan ElevenLabs le permet.
 
-Plus besoin de : application Meta, projet Google Cloud, application TikTok, compte n8n.
+Plus besoin de : Postiz ou tout abonnement de publication, compte n8n.
 
 ## 10. Coût mensuel
 
 | Poste | Montant |
 |---|---|
-| Postiz Standard | 29 $ (≈ 27 €) |
+| APIs Meta, YouTube, TikTok | 0 € |
 | Netlify, Supabase, GitHub Actions | 0 € (offres gratuites suffisantes) |
+| Serveur FTP Railway pour la passerelle Hektor (avec la refonte du site) | ≈ 5 €/mois, plus tard |
 | Routines Claude Code | inclus dans votre abonnement Claude |
 | ElevenLabs, Higgsfield, Canva | vos abonnements existants |
-| **Total nouveau** | **≈ 27 €/mois** |
+| **Total nouveau aujourd'hui** | **0 €/mois** |
 
 ## 11. Phases
 
 | Phase | Contenu | Qui | Durée |
 |---|---|---|---|
 | 0 | Décisions du §8 | Olivier | 1 échange |
-| 1 | Comptes du §9 | Olivier, guidé | 1 à 2 h |
-| 2 | Dépôt multi-marques, schéma v2, site Netlify avec fonctions | Claude | 1 session |
-| 3 | Validation par mail de bout en bout, premier vrai post AMO | Claude + Olivier | 1 session |
+| 1 | Comptes du §9 (Meta, Google, TikTok, Supabase, Netlify) | Olivier, guidé | 2 h |
+| 2 | Dépôt multi-marques, schéma v2, tableau de bord et fonctions Netlify, lecture du site AMO | Claude | 2 sessions |
+| 3 | Validation de bout en bout : premier vrai post AMO sur Facebook et Instagram | Claude + Olivier | 1 session |
 | 4 | Routine AMO image en production, une semaine d'observation | Routine | 1 semaine |
 | 5 | Vidéo : pipeline GitHub Actions, chaîne tech, AMO 18h | Claude | 2 à 3 sessions |
 | 6 | Basket : page de dépôt, montage automatique | Claude | 1 à 2 sessions |
 | 7 | Statistiques Windsor.ai, publication par défaut après X semaines sans refus | Claude | plus tard |
 
 ## Sources vérifiées le 6 septembre 2026
+- Hektor, passerelles et flux : https://www.immowp.fr/nos-passerelles/passerelle-immobiliere-hektor-la-boite-immo-wordpress et https://wpline.fr/produit/plugin-hektor-wordpress/
+- Higgsfield Speak et Soul ID : https://higgsfield.cc/higgsfield-speak et https://higgsfield.ai/blog/make-ai-lipsync-videos
 - Postiz : https://postiz.com/ et https://postplanify.com/postiz-pricing
 - Zernio (ex-Late) : https://getlate.dev/pricing
 - Publer : https://publer.com/plans et https://blog.publer.com/publer-api-for-marketers-and-developers/

@@ -9,12 +9,13 @@ Automatisation des posts réseaux sociaux d'AMO Invest (agence immobilière, Gra
 
 | Phase | Contenu | État |
 |---|---|---|
-| 1. Accès | App Meta, Google Cloud / YouTube, TikTok | À faire par Olivier |
-| 2. Repo | Structure, CLAUDE.md, skills, templates HTML, rendu PNG | **Fait** |
-| 3. Supabase | `supabase/schema.sql`, buckets, clé service | Fichier SQL prêt, à exécuter |
-| 4. n8n | Workflow aperçu mail → validation → publication | Squelette vide |
-| 5. Routine image 11h03 | Routine Claude Code + run manuel | À faire |
-| 6. Vidéo 18h03 | GitHub Actions, Playwright, Remotion | Squelettes vides |
+| 0. Architecture | `docs/architecture-v2.md` : trois marques, hybride gratuit, tableau de bord | **Décidée** |
+| 1. Comptes | App Meta, projet Google, app TikTok (inbox), Supabase, Netlify, comptes sociaux | À faire par Olivier, guidé |
+| 2. Repo | Templates HTML, rendu PNG **faits** ; multi-marques, tableau de bord, fonctions Netlify, lecture du site | En cours |
+| 3. Bout en bout | Premier vrai post AMO validé et publié sur Facebook et Instagram | À faire |
+| 4. Routine AMO image | Routine Claude Code + une semaine d'observation | À faire |
+| 5. Vidéo | GitHub Actions, Remotion, ElevenLabs, présentateur Higgsfield | Squelettes vides |
+| 6. Basket | Dépôt de match, montage, brouillon TikTok | À faire |
 
 ## Produire un visuel en local (3 commandes)
 
@@ -47,8 +48,8 @@ content/examples/              textes d'exemple pour les tests
 templates/                     post-feed.html, post-story.html, datacard.html
 render/render-image.js         HTML → PNG (Playwright)
 render/remotion, scenarios     vidéo (phase 6)
-scripts/publish-to-supabase.js upload + insert + webhook n8n (phase 3)
-n8n/workflow-publication.json  workflow de validation/publication (phase 4)
+scripts/publish-to-supabase.js upload + insert + mail « un post est prêt » (phase 2)
+netlify/                       tableau de bord et fonctions de publication (phase 2)
 supabase/schema.sql            table posts + buckets
 .github/workflows/             rendu vidéo (phase 6)
 ```
