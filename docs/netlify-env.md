@@ -2,6 +2,8 @@
 
 À renseigner dans Netlify : Site configuration → Environment variables. Jamais dans le dépôt.
 
+État au 7 septembre 2026 : `SUPABASE_URL`, `DASHBOARD_URL`, `SITE_BASE_URL`, `INTERNAL_SECRET` et `DASHBOARD_PASSWORD` sont posées par Claude via le connecteur Netlify. Reste `SUPABASE_SERVICE_KEY`, que seul Olivier peut copier depuis Supabase.
+
 | Variable | Rôle | Où la trouver | Quand |
 |---|---|---|---|
 | `SUPABASE_URL` | Adresse du projet Supabase « Communication » | Supabase → Project settings → Data API → Project URL | Étape 2 |
