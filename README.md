@@ -11,7 +11,7 @@ Automatisation des posts réseaux sociaux d'AMO Invest (agence immobilière, Gra
 |---|---|---|
 | 0. Architecture | `docs/architecture-v2.md` : trois marques, hybride gratuit, tableau de bord | **Décidée** |
 | 1. Comptes | App Meta, projet Google, app TikTok (inbox), Supabase, Netlify, comptes sociaux | À faire par Olivier, guidé |
-| 2. Repo | Templates HTML, rendu PNG **faits** ; multi-marques, tableau de bord, fonctions Netlify, lecture du site | En cours |
+| 2. Repo | Templates, rendu PNG, schéma Supabase (appliqué sur « Communication »), tableau de bord, fonctions Netlify, lecteur amoinvest.fr, script des routines | **Construit, en attente de push** |
 | 3. Bout en bout | Premier vrai post AMO validé et publié sur Facebook et Instagram | À faire |
 | 4. Routine AMO image | Routine Claude Code + une semaine d'observation | À faire |
 | 5. Vidéo | GitHub Actions, Remotion, ElevenLabs, présentateur Higgsfield | Squelettes vides |
@@ -49,7 +49,10 @@ templates/                     post-feed.html, post-story.html, datacard.html
 render/render-image.js         HTML → PNG (Playwright)
 render/remotion, scenarios     vidéo (phase 6)
 scripts/publish-to-supabase.js upload + insert + mail « un post est prêt » (phase 2)
-netlify/                       tableau de bord et fonctions de publication (phase 2)
+netlify/site/                  tableau de bord privé (posts prêts, déposer, annonces, historique)
+netlify/functions/             API du tableau de bord, liens Valider/Refuser, publication Meta/YouTube/TikTok, lecteur du site, OAuth
+brands/<slug>/                 charte et enseignements par marque
+docs/netlify-env.md            variables d'environnement à renseigner dans Netlify
 supabase/schema.sql            table posts + buckets
 .github/workflows/             rendu vidéo (phase 6)
 ```

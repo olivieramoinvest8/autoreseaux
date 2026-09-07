@@ -31,8 +31,8 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 | Visuels image | `templates/*.html` → PNG via `render/render-image.js` (Playwright) | 1080×1350 feed, 1080×1920 story ; fond Higgsfield avec parcimonie |
 | Vidéo | GitHub Actions (Playwright + Remotion + ffmpeg) | Une longue 16:9 + extraits 9:16, sous-titres depuis le script |
 | Voix et présentateur | ElevenLabs ; Higgsfield Speak + Soul ID | Contenu synthétique signalé dans les descriptions |
-| Stockage | Supabase, projet dédié | `brands`, `posts`, `listings`, `inbox`, `matches`, `tokens` + buckets `visuels`, `videos`, `raw` |
-| Validation | Mail Gmail → tableau de bord privé Netlify | Valider / Refuser / Modifier, Copier, Télécharger, Déposer |
+| Stockage | Supabase, projet « Communication », schéma `social` | `brands`, `posts`, `listings`, `inbox`, `matches`, `tokens` + buckets `visuels`, `videos`, `raw` |
+| Validation | Mail Gmail → tableau de bord privé Netlify (`netlify/site`, mot de passe `DASHBOARD_PASSWORD`) | Valider / Refuser / Modifier, Copier, Télécharger, Déposer, Annonces, Historique |
 | Publication | Fonctions Netlify : API Meta, API YouTube, brouillon TikTok | Jamais Claude en direct. n8n et Postiz écartés |
 | Stats et apprentissage | Routine `analytics` via Windsor.ai → `metrics` ; `posts.features` ; `brands/<slug>/learnings.md` | Lu par le stratège à chaque création. Un test par semaine |
 
@@ -98,7 +98,13 @@ npm install                      # installe Playwright (une seule fois)
 npx playwright install chromium  # installe le navigateur de rendu (une seule fois)
 npm run test:image               # produit output/post-feed-test.png à partir de l'exemple
 node render/render-image.js --template templates/post-feed.html --data content/examples/post-test.json --out output/mon-post.png
+npm run test:functions          # vérifie la syntaxe des fonctions Netlify
+npm run test:listings           # auto-test du lecteur d'annonces amoinvest.fr
+node netlify/functions/_lib/listings.js --dry-run   # lit vraiment le site, n'écrit rien
+node scripts/publish-to-supabase.js --brand amo-invest --asset output/post.png --post content/runs/<date>.json
 ```
+
+Règle de travail avec Olivier : **rien n'est poussé sur GitHub sans son accord explicite** (« on pousse »), car Netlify construit le site à chaque push. On commite en local, on pousse sur son signal.
 
 ## 8. Conventions de code
 

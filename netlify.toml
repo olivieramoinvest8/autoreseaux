@@ -1,0 +1,29 @@
+# Configuration Netlify du site "communicationsocial" (tableau de bord + fonctions).
+[build]
+  publish = "netlify/site"
+  functions = "netlify/functions"
+  command = "echo 'Site statique, rien a construire'"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["brands/**"]
+
+# Lecture d'amoinvest.fr chaque matin a 7h UTC (9h Paris en ete, 8h en hiver).
+[functions."read-listings"]
+  schedule = "0 7 * * *"
+
+# Renouvellement du jeton Meta (60 jours) : verification hebdomadaire.
+[functions."refresh-tokens"]
+  schedule = "0 6 * * 1"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"

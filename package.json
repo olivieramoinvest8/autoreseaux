@@ -7,12 +7,18 @@
     "render:image": "node render/render-image.js",
     "test:image": "node render/render-image.js --template templates/post-feed.html --data content/examples/post-test.json --out output/post-feed-test.png",
     "test:story": "node render/render-image.js --template templates/post-story.html --data content/examples/post-test.json --out output/post-story-test.png",
-    "test:datacard": "node render/render-image.js --template templates/datacard.html --data content/examples/datacard-test.json --out output/datacard-test.png"
+    "test:datacard": "node render/render-image.js --template templates/datacard.html --data content/examples/datacard-test.json --out output/datacard-test.png",
+    "test:listings": "node netlify/functions/_lib/listings.js --test",
+    "test:functions": "node --check netlify/functions/*.js && node --check netlify/functions/_lib/*.js && node --check netlify/functions/_lib/publish/*.js && echo 'syntaxe OK'"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
     "playwright": "1.56.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cheerio": "^1.0.0"
   }
 }

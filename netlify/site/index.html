@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de bord · Social Bot</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brandline"><span class="dot"></span><strong>Social Bot</strong><span class="sub">AMO Invest · Tech · Basket</span></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="posts" class="on">Posts prêts <span class="badge" id="badge-posts"></span></button>
+    <button data-tab="deposer">Déposer</button>
+    <button data-tab="annonces">Annonces</button>
+    <button data-tab="historique">Historique</button>
+    <button data-tab="perf">Performances</button>
+  </nav>
+</header>
+
+<main>
+  <section id="login" hidden>
+    <h1>Tableau de bord privé</h1>
+    <p>Entrez le mot de passe du tableau de bord. Il reste mémorisé sur cet appareil.</p>
+    <form id="login-form"><input type="password" id="pwd" placeholder="Mot de passe" autocomplete="current-password" required><button type="submit">Entrer</button></form>
+    <p class="err" id="login-err" hidden></p>
+  </section>
+
+  <section id="tab-posts" class="tab">
+    <div class="toolbar"><h1>Posts prêts</h1><button class="ghost" id="reload-posts">Actualiser</button></div>
+    <div id="posts"></div>
+  </section>
+
+  <section id="tab-deposer" class="tab" hidden>
+    <h1>Déposer</h1>
+    <p class="hint">Une info d'agence, un match, un enregistrement. Le robot s'en sert au prochain créneau.</p>
+    <form id="inbox-form" class="card">
+      <label>Marque
+        <select name="brand"><option value="amo-invest">AMO Invest</option><option value="tech">Chaîne tech</option><option value="basket">Basket</option></select></label>
+      <label>Type
+        <select name="kind" id="kind"><option value="info">Info d'agence (signature, mandat, événement)</option><option value="match">Match de basket</option><option value="enregistrement">Enregistrement (voix, remarque)</option><option value="bien">Bien à mettre en avant</option></select></label>
+      <label>Titre <input name="title" placeholder="Ex. Signature chez le notaire, maison à Graveson"></label>
+      <label>Deux phrases <textarea name="body" rows="3" placeholder="Ce qu'il faut savoir. Pas de nom de client, pas d'adresse précise."></textarea></label>
+      <div id="match-fields" hidden class="grid2">
+        <label>Date du match <input type="date" name="date"></label>
+        <label>Adversaire <input name="opponent" placeholder="Ex. Châteaurenard"></label>
+        <label>Score équipe <input type="number" name="score_home" min="0"></label>
+        <label>Score adversaire <input type="number" name="score_away" min="0"></label>
+        <label class="row"><input type="checkbox" name="home" checked> Match à domicile</label>
+      </div>
+      <label>Fichiers (photos, clips, audio) <input type="file" name="files" multiple></label>
+      <div class="actions"><button type="submit" id="inbox-submit">Déposer</button><span id="inbox-status" class="status"></span></div>
+    </form>
+    <h2>Derniers dépôts</h2>
+    <div id="inbox-list"></div>
+  </section>
+
+  <section id="tab-annonces" class="tab" hidden>
+    <div class="toolbar"><h1>Annonces lues sur amoinvest.fr</h1><button class="ghost" id="reread">Relire le site maintenant</button></div>
+    <p class="hint" id="reread-status"></p>
+    <div id="listings"></div>
+  </section>
+
+  <section id="tab-historique" class="tab" hidden>
+    <h1>Historique</h1>
+    <h2>Posts traités</h2>
+    <div id="history"></div>
+    <h2>Journal</h2>
+    <div id="events"></div>
+  </section>
+
+  <section id="tab-perf" class="tab" hidden>
+    <h1>Performances</h1>
+    <p class="hint">Cet onglet s'active en phase 7, quand la routine d'analyse aura commencé à lire les chiffres de vos réseaux. Il faudra une trentaine de vidéos avant des conclusions solides.</p>
+  </section>
+</main>
+
+<div id="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
