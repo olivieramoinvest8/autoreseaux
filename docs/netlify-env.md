@@ -18,7 +18,7 @@
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Projet Google Cloud, identifiant OAuth | console.cloud.google.com → Identifiants | Étape 4 |
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Application TikTok | developers.tiktok.com → votre app | Étape 5 |
 
-Les refresh tokens Google et TikTok ne sont pas des variables : ils sont stockés dans la table `social.tokens` par les fonctions `oauth-google` et `oauth-tiktok`, que vous ouvrez une fois dans le navigateur.
+Le jeton Meta est celui de la **page**, obtenu via un utilisateur système du portefeuille Business (n'expire pas). Les refresh tokens Google et TikTok ne sont pas des variables : ils sont stockés dans la table `social.tokens` par les fonctions `oauth-google` et `oauth-tiktok`, que vous ouvrez une fois dans le navigateur.
 
 URI de redirection à déclarer :
 - Google : `https://communicationsocial.netlify.app/.netlify/functions/oauth-google`

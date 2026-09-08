@@ -61,6 +61,7 @@ netlify/site/                  tableau de bord privé (posts prêts, déposer, a
 netlify/functions/             API du tableau de bord, liens Valider/Refuser, publication Meta/YouTube/TikTok, lecteur du site, OAuth
 brands/<slug>/                 charte et enseignements par marque
 docs/netlify-env.md            variables d'environnement à renseigner dans Netlify
-supabase/schema.sql            table posts + buckets
+supabase/schema.sql            tables et buckets
+supabase/functions/            fonctions Supabase : fetch-image (relais d'images), bot-draft (guichet de dépôt des routines)
 .github/workflows/             rendu vidéo (phase 6)
 ```

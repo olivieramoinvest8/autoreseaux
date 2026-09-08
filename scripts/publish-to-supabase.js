@@ -10,7 +10,12 @@
  * avec un jeton de validation valable 48 h ; 3) affiche le texte du mail à envoyer (liens Valider / Refuser
  * et lien du tableau de bord). La routine envoie ensuite ce mail via le connecteur Gmail.
  *
- * Variables : SUPABASE_URL, SUPABASE_SERVICE_KEY, DASHBOARD_URL.
+ * Deux modes :
+ *   - direct : SUPABASE_URL + SUPABASE_SERVICE_KEY (fonctions Netlify, GitHub Actions) ;
+ *   - relais : SUPABASE_URL + SUPABASE_ANON_KEY + BOT_SECRET (routines Claude Code, qui ne détiennent pas la clé
+ *     service) → tout passe par la fonction Supabase « bot-draft », qui ne sait que déposer des brouillons.
+ * Variables lues dans l'environnement ou dans .env : SUPABASE_URL, SUPABASE_SERVICE_KEY | SUPABASE_ANON_KEY + BOT_SECRET, DASHBOARD_URL.
+ * Options : --extra fichier.png (répétable) pour les slides d'un carrousel ou les déclinaisons (extra_media).
  */
 const fs = require("fs");
 const path = require("path");
@@ -18,12 +23,59 @@ const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
 function arg(name, def) { const i = process.argv.indexOf(name); return i > -1 ? process.argv[i + 1] : def; }
+function args(name) { return process.argv.map((a, i) => (a === name ? process.argv[i + 1] : null)).filter(Boolean); }
+
+/** Lit .env à la racine si les variables ne sont pas déjà dans l'environnement. */
+function loadEnv() {
+  const p = path.resolve(__dirname, "..", ".env");
+  if (!fs.existsSync(p)) return;
+  for (const line of fs.readFileSync(p, "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+  }
+}
+
+const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4" };
+
+/** Mode relais : appelle la fonction Supabase bot-draft avec le secret de bot. */
+async function relay(action, payload) {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY, BOT_SECRET } = process.env;
+  const res = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/bot-draft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}`, apikey: SUPABASE_ANON_KEY, "x-bot-secret": BOT_SECRET },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`bot-draft ${action} : ${data.error || res.status}`);
+  return data;
+}
+
+async function uploadViaRelay(brandSlug, filePath) {
+  const type = MIME[path.extname(filePath).toLowerCase()];
+  if (!type) throw new Error(`type de fichier non géré : ${filePath}`);
+  const r = await relay("upload", { brand: brandSlug, name: path.basename(filePath), type, base64: fs.readFileSync(filePath).toString("base64") });
+  return r.url;
+}
+
+async function mainRelay(brandSlug, assetPath, postPath, extras) {
+  const post = JSON.parse(fs.readFileSync(postPath, "utf8"));
+  const media_url = assetPath ? await uploadViaRelay(brandSlug, assetPath) : post.media_url || null;
+  const extra_media = [];
+  for (const f of extras) extra_media.push({ url: await uploadViaRelay(brandSlug, f), kind: "slide" });
+  const r = await relay("create", { brand: brandSlug, dashboard_url: process.env.DASHBOARD_URL || "", post: { ...post, media_url, extra_media: extra_media.length ? extra_media : post.extra_media || [] } });
+  console.log(JSON.stringify(r, null, 2));
+}
 
 async function main() {
-  const brandSlug = arg("--brand"); const assetPath = arg("--asset"); const postPath = arg("--post");
+  loadEnv();
+  const brandSlug = arg("--brand"); const assetPath = arg("--asset"); const postPath = arg("--post"); const extras = args("--extra");
   if (!brandSlug || !postPath) throw new Error("--brand et --post sont requis");
   const { SUPABASE_URL, SUPABASE_SERVICE_KEY, DASHBOARD_URL } = process.env;
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) throw new Error("SUPABASE_URL et SUPABASE_SERVICE_KEY sont requis");
+  if (!SUPABASE_URL) throw new Error("SUPABASE_URL est requis");
+  if (!SUPABASE_SERVICE_KEY) {
+    if (!process.env.SUPABASE_ANON_KEY || !process.env.BOT_SECRET) throw new Error("Sans SUPABASE_SERVICE_KEY, il faut SUPABASE_ANON_KEY et BOT_SECRET (mode relais)");
+    return mainRelay(brandSlug, assetPath, postPath, extras);
+  }
   const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { db: { schema: "social" }, auth: { persistSession: false } });
 
   const { data: brand, error: be } = await db.from("brands").select("*").eq("slug", brandSlug).single();
