@@ -71,3 +71,10 @@ Sauvegarde le fichier dans `/mnt/user-data/outputs/`, puis utilise `present_file
 - Ne jamais inventer une actualité ou un chiffre fiscal/légal sans l'avoir vérifié par recherche web — la crédibilité d'AMO Invest en dépend.
 - Si Olivier précise un segment en particulier ("donne-moi des idées de post pour les investisseurs"), concentre les 5 idées sur ce seul segment plutôt que de les répartir sur les 4.
 - Si Olivier précise une actualité ou un sujet précis qu'il veut traiter, intègre-le comme fil rouge d'au moins une idée plutôt que de l'ignorer.
+
+## Mode automatisé — amo-social-bot (routines)
+
+Quand ce skill est utilisé par une routine du dépôt : pas de fichier Word, pas de question à Olivier. Produire le JSON du post (`content/runs/<date>-post-*.json`, mêmes clés que `scripts/publish-to-supabase.js`) avec `text_fb`, `text_ig`, `hashtags`, `features`.
+- Lire d'abord `brands/<slug>/charte.md`, `brands/<slug>/learnings.md`, `content/calendar.json` et les 30 derniers `posts` (thèmes et `features`).
+- Choisir le sujet par priorité (dépôt d'Olivier > changement d'annonce > création), puis le **format visuel** dans `calendar.json → formats_image` en respectant la rotation : jamais le même template + variante que le post précédent. Varier aussi le type d'accroche.
+- Les statistiques (learnings.md) pondèrent le choix ; elles ne le figent jamais. Un test par semaine, une seule variable.

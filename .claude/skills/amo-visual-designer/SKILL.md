@@ -163,7 +163,10 @@ Présente le visuel avec un court résumé : format retenu (et pourquoi, selon l
 
 Quand ce skill est utilisé par une routine de ce dépôt (sans Olivier dans la boucle au moment de la production), les règles ci-dessus restent valables (charte, contraste, mentions légales, textes en français) avec ces adaptations :
 
-- **Pas de Canva** : le visuel est produit par `render/render-image.js` à partir d'un template de `templates/` (`post-feed.html` 1080×1350, `post-story.html` 1080×1920, `datacard.html` pour un chiffre-clé).
+- **Pas de Canva** : le visuel est produit par `render/render-image.js` à partir d'un template de `templates/` : `post-feed.html`, `post-story.html`, `datacard.html`, `annonce-feed.html` / `annonce-story.html` (affiche d'annonce), `carrousel-*.html` (via `render/render-carousel.js`), `pedagogie-premium.html` (objet 3D Higgsfield). Catalogue et variantes : `content/calendar.json` → `formats_image`, détails dans `docs/atelier-visuel.md`.
+- **Variété obligatoire** (règle d'Olivier) : relire `posts.features` des derniers posts de la marque ; ne jamais reprendre le même template et la même variante que le post précédent ; un template ne revient pas avant `regles.rotation_format_posts` posts. Varier aussi l'objet 3D, la place de la photo, le fond, le ton de l'accroche. La charte (couleurs, polices, logo, mentions légales) reste fixe.
+- **Apprentissage** : lire `brands/<slug>/learnings.md` (section « Formats visuels ») avant de choisir ; favoriser ce qui marche sans le figer, et respecter le test de la semaine.
+- **Enregistrer** dans `features` : `format` (template), `variante`, `visuel` (photo réelle / objet 3D / data card / sans image), `accroche`, `cta`, `ia` (ce qui a été généré).
 - **Pas de question à Olivier** pendant le run : le format est fixé par le créneau (11h = feed 1080×1350). En cas de doute sur un sujet, choisir le plus sobre.
 - **Données** : écrire un JSON avec les clés du template (`segment`, `title`, `body`, `cta`, `figure`, `figure_label`, `source`, `localisation`), puis lancer :
   `node render/render-image.js --template templates/post-feed.html --data <fichier.json> --out output/<nom>.png`

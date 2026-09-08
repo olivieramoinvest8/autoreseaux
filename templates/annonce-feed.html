@@ -18,6 +18,7 @@
     dpe, ges              classes A à G — jamais inventées ; si absentes, les pastilles n'apparaissent pas
     ref                   référence de l'annonce ("Réf. 458")
     site                  "amoinvest.fr"
+    variant_clair         mettre "1" pour la variante à fond clair (bloc blanc, textes bleu marine, cartouche bleu) ; vide = variante marine
 -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -95,6 +96,22 @@
   .footer .r { text-align: right; }
   .footer .site { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .08em; text-transform: uppercase; }
   .footer .ref { margin-top: 6px; font-size: 24px; font-weight: 600; color: var(--gold-dark); }
+</style>
+<style data-if="variant_clair">
+  /* Variante « clair » : même composition, bloc blanc et cartouche bleu marine. */
+  body { background: var(--white); }
+  .block { background: var(--white); color: var(--navy-deep); }
+  .block .diag .w { background: rgba(46,53,141,.08); }
+  .kicker { color: #B8901A; }
+  h1 { color: var(--navy); }
+  .specs span { border-color: rgba(46,53,141,.35); color: var(--navy-deep); }
+  .price { text-shadow: 0 2px 0 var(--gold-dark), 0 4px 0 #C99E14, 0 6px 0 #A8830E, 0 10px 18px rgba(46,53,141,.25); }
+  .fees { color: #33395F; }
+  .energy .lab { color: #5C6187; }
+  .thumbs div { border-color: var(--navy); box-shadow: 0 10px 24px rgba(46,53,141,.25); }
+  .footer { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); color: var(--white); }
+  .footer img { background: var(--white); padding: 10px 16px; border-radius: 8px; height: 132px; }
+  .footer .ref { color: var(--gold); }
 </style>
 </head>
 <body>

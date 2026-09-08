@@ -1,19 +1,136 @@
 {
   "_doc": "Calendrier éditorial hebdomadaire. Chaque jour : segment prioritaire et angles possibles par créneau. La routine choisit un angle non traité dans les 14 derniers jours (vérifier la table posts). 0 = dimanche, pas de publication.",
-  "segments": ["vendeurs", "investisseurs", "acheteurs", "bailleurs"],
+  "segments": [
+    "vendeurs",
+    "investisseurs",
+    "acheteurs",
+    "bailleurs"
+  ],
   "semaine": {
-    "1": { "jour": "lundi",    "segment": "investisseurs", "11h": ["calcul de rendement réel", "fiscalité locative expliquée simplement", "erreurs classiques du premier investissement"], "18h": ["démo outil : estimateur DVF", "data card : un chiffre du marché local"] },
-    "2": { "jour": "mardi",    "segment": "vendeurs",      "11h": ["prix juste vs prix espéré", "diagnostics obligatoires avant vente", "préparer une visite"], "18h": ["démo outil : fiche-visite", "voix off : les étapes d'une vente"] },
-    "3": { "jour": "mercredi", "segment": "acheteurs",     "11h": ["budget global d'un achat (frais inclus)", "lire un DPE", "compromis : ce qu'il faut vérifier"], "18h": ["data card : taux et capacité d'emprunt", "démo outil : simulateur de mensualité"] },
-    "4": { "jour": "jeudi",    "segment": "bailleurs",     "11h": ["gestion locative : ce que ça couvre", "loyer et encadrement", "impayés : prévenir plutôt que subir"], "18h": ["voix off : mise en location pas à pas", "data card : coût réel d'une vacance locative"] },
-    "5": { "jour": "vendredi", "segment": "investisseurs", "11h": ["actualité fiscale ou réglementaire de la semaine", "cas concret anonymisé", "question fréquente d'investisseur"], "18h": ["démo outil au choix", "récap actualité en 45 s"] },
-    "6": { "jour": "samedi",   "segment": "acheteurs",     "11h": ["vivre à Graveson et alentour", "coulisses de l'agence, sans vente", "conseil pratique du week-end"], "18h": ["scène locale ou B-roll Provence + conseil", "data card légère"] },
-    "0": { "jour": "dimanche", "segment": null, "11h": [], "18h": [] }
+    "1": {
+      "jour": "lundi",
+      "segment": "investisseurs",
+      "11h": [
+        "calcul de rendement réel",
+        "fiscalité locative expliquée simplement",
+        "erreurs classiques du premier investissement"
+      ],
+      "18h": [
+        "démo outil : estimateur DVF",
+        "data card : un chiffre du marché local"
+      ]
+    },
+    "2": {
+      "jour": "mardi",
+      "segment": "vendeurs",
+      "11h": [
+        "prix juste vs prix espéré",
+        "diagnostics obligatoires avant vente",
+        "préparer une visite"
+      ],
+      "18h": [
+        "démo outil : fiche-visite",
+        "voix off : les étapes d'une vente"
+      ]
+    },
+    "3": {
+      "jour": "mercredi",
+      "segment": "acheteurs",
+      "11h": [
+        "budget global d'un achat (frais inclus)",
+        "lire un DPE",
+        "compromis : ce qu'il faut vérifier"
+      ],
+      "18h": [
+        "data card : taux et capacité d'emprunt",
+        "démo outil : simulateur de mensualité"
+      ]
+    },
+    "4": {
+      "jour": "jeudi",
+      "segment": "bailleurs",
+      "11h": [
+        "gestion locative : ce que ça couvre",
+        "loyer et encadrement",
+        "impayés : prévenir plutôt que subir"
+      ],
+      "18h": [
+        "voix off : mise en location pas à pas",
+        "data card : coût réel d'une vacance locative"
+      ]
+    },
+    "5": {
+      "jour": "vendredi",
+      "segment": "investisseurs",
+      "11h": [
+        "actualité fiscale ou réglementaire de la semaine",
+        "cas concret anonymisé",
+        "question fréquente d'investisseur"
+      ],
+      "18h": [
+        "démo outil au choix",
+        "récap actualité en 45 s"
+      ]
+    },
+    "6": {
+      "jour": "samedi",
+      "segment": "acheteurs",
+      "11h": [
+        "vivre à Graveson et alentour",
+        "coulisses de l'agence, sans vente",
+        "conseil pratique du week-end"
+      ],
+      "18h": [
+        "scène locale ou B-roll Provence + conseil",
+        "data card légère"
+      ]
+    },
+    "0": {
+      "jour": "dimanche",
+      "segment": null,
+      "11h": [],
+      "18h": []
+    }
   },
   "regles": {
     "rotation_theme_jours": 14,
     "posts_a_relire": 30,
-    "reseaux_image": ["facebook", "instagram"],
-    "reseaux_video": ["instagram", "tiktok", "youtube"]
+    "reseaux_image": [
+      "facebook",
+      "instagram"
+    ],
+    "reseaux_video": [
+      "instagram",
+      "tiktok",
+      "youtube"
+    ],
+    "rotation_format_posts": 6,
+    "_formats": "Jamais deux posts de suite avec le même template et la même variante ; un template ne revient pas avant rotation_format_posts posts image. Les stats (learnings.md) pondèrent le choix sans jamais figer un seul format."
+  },
+  "formats_image": {
+    "_doc": "Templates disponibles pour le post image de 11h, avec leurs variantes. La routine choisit un couple template+variante non utilisé dans les derniers posts (regles.rotation_format_posts) et l'enregistre dans posts.features.format et posts.features.variante.",
+    "annonce-feed": [
+      "marine",
+      "clair"
+    ],
+    "carrousel": [
+      "cover-photo",
+      "cover-marine"
+    ],
+    "pedagogie-premium": [
+      "maison-or-podium",
+      "maison-or-contour",
+      "objet-nouveau"
+    ],
+    "post-feed": [
+      "marine",
+      "photo-voilee"
+    ],
+    "datacard": [
+      "clair"
+    ],
+    "evenement": [
+      "a-creer"
+    ]
   }
 }
