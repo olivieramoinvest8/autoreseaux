@@ -9,7 +9,10 @@
     "test:story": "node render/render-image.js --template templates/post-story.html --data content/examples/post-test.json --out output/post-story-test.png",
     "test:datacard": "node render/render-image.js --template templates/datacard.html --data content/examples/datacard-test.json --out output/datacard-test.png",
     "test:listings": "node netlify/functions/_lib/listings.js --test",
-    "test:functions": "node --check netlify/functions/*.js && node --check netlify/functions/_lib/*.js && node --check netlify/functions/_lib/publish/*.js && echo 'syntaxe OK'"
+    "test:functions": "node --check netlify/functions/*.js && node --check netlify/functions/_lib/*.js && node --check netlify/functions/_lib/publish/*.js && echo 'syntaxe OK'",
+    "test:annonce": "node render/render-image.js --template templates/annonce-feed.html --data content/runs/2026-09-08-annonce-458.json --out output/annonce-test.png",
+    "render:carousel": "node render/render-carousel.js",
+    "fetch:media": "node render/fetch-media.js"
   },
   "engines": {
     "node": ">=20"

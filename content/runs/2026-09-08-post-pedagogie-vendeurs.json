@@ -1,0 +1,20 @@
+{
+  "_doc": "Post prêt pour scripts/publish-to-supabase.js (création 3). Asset : output/creations/pedagogie-vendeurs-feed.png. Segment vendeurs (mardi), thème du calendrier « prix juste vs prix espéré ».",
+  "slot": "11h",
+  "type": "image",
+  "segment": "vendeurs",
+  "theme": "prix juste vs prix espéré",
+  "networks": ["facebook", "instagram"],
+  "text_fb": "Le prix juste se calcule. Il ne s'espère pas.\n\nUn prix de vente, ce n'est ni le prix d'achat d'il y a dix ans plus les travaux, ni le prix qu'a obtenu le voisin, ni le prix dont on a besoin pour le projet suivant. C'est ce que le marché paie aujourd'hui pour ce bien, dans cet état, dans ce délai.\n\nÀ Graveson et alentour, nous partons des ventes réellement conclues sur le secteur, de l'état du bien et du délai que vous souhaitez. Le résultat est un prix argumenté, pas une promesse. Un bien au bon prix se vend ; un bien surévalué s'installe dans les annonces et finit par se vendre moins cher.\n\nEstimation sur rendez-vous, sans engagement. Écrivez-nous.",
+  "text_ig": "Le prix juste se calcule, il ne s'espère pas. Ventes réelles du secteur, état du bien, délai souhaité : voilà ce qui fixe un prix. Pas l'envie, pas le prix du voisin.\nEstimation sur rendez-vous à Graveson et alentour. Écrivez-nous.",
+  "hashtags": ["#vendresamaison", "#estimationimmobiliere", "#Graveson", "#BouchesDuRhone", "#Provence", "#immobilier", "#vendeur", "#prixdevente", "#conseilimmobilier", "#AMOInvest", "#agenceimmobiliere", "#Alpilles"],
+  "features": {
+    "accroche": "affirmation",
+    "format": "pédagogie premium (objet 3D)",
+    "sujet": "prix de vente",
+    "presentateur": false,
+    "cta": "estimation sur rendez-vous",
+    "photos": "aucune",
+    "ia": "objet 3D Higgsfield (fond), texte posé par la composition"
+  }
+}

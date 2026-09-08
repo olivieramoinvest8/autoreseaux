@@ -1,0 +1,92 @@
+<!--
+  templates/carrousel-infos.html — Dernière slide d'un carrousel d'annonce AMO Invest, 1080×1350.
+  Fond bleu marine, récapitulatif en lignes (libellé + valeur), DPE et GES en pastilles, appel à l'action, logo.
+
+  Clés attendues :
+    kicker            "En résumé · Réf. 447"
+    title             titre court (majuscules automatiques)
+    row1_label, row1_value … row6_label, row6_value   lignes du récapitulatif (facultatives)
+    dpe, ges          classes A à G, jamais inventées
+    cta               "Parlons-en"
+    site              "amoinvest.fr"
+    note              mention en petit (honoraires, source des chiffres)
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — carrousel, récapitulatif</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+  :root { --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF; --pad: 80px; --footer-h: 190px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { position: relative; background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); color: var(--white); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .diag { position: absolute; inset: 0; bottom: var(--footer-h); pointer-events: none; }
+  .diag .gold  { position: absolute; inset: 0; background: var(--gold); clip-path: polygon(1010px 0, 1036px 0, 826px 100%, 800px 100%); }
+  .diag .white { position: absolute; inset: 0; background: rgba(255,255,255,.35); clip-path: polygon(1054px 0, 1066px 0, 856px 100%, 844px 100%); }
+
+  .content { position: absolute; left: var(--pad); right: var(--pad); top: 84px; bottom: var(--footer-h); display: flex; flex-direction: column; }
+  .kicker { display: flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 28px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .kicker::before { content: ""; width: 48px; height: 4px; background: var(--gold); }
+  h1 { margin-top: 20px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 70px; line-height: 1.04; text-transform: uppercase; max-width: 720px; }
+
+  table { margin-top: 40px; border-collapse: collapse; width: 720px; }
+  td { padding: 18px 0; border-bottom: 2px solid rgba(255,255,255,.18); font-size: 30px; line-height: 1.25; vertical-align: top; }
+  td.l { color: rgba(255,255,255,.72); width: 300px; padding-right: 20px; }
+  td.v { font-family: "Oswald", sans-serif; font-weight: 500; font-size: 34px; letter-spacing: .02em; }
+  td.v.gold { color: var(--gold); font-weight: 700; font-size: 44px; }
+
+  .energy { margin-top: 30px; display: flex; gap: 16px; align-items: center; }
+  .energy .tag { display: flex; align-items: center; gap: 12px; }
+  .energy .lab { font-family: "Oswald", sans-serif; font-size: 24px; letter-spacing: .14em; color: rgba(255,255,255,.8); }
+  .energy .let { width: 70px; height: 70px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 42px; color: #1A1A1A; background: #CCC; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  .let.dpe-A { background: #00A06D; color: #fff; } .let.dpe-B { background: #52B153; color: #fff; } .let.dpe-C { background: #A5CE4D; }
+  .let.dpe-D { background: #F4E70F; } .let.dpe-E { background: #F0B50F; } .let.dpe-F { background: #EB8235; color: #fff; } .let.dpe-G { background: #D7221F; color: #fff; }
+  .let.ges-A { background: #EDE5F6; } .let.ges-B { background: #D2C0EA; } .let.ges-C { background: #B49BDD; } .let.ges-D { background: #9676CE; color: #fff; }
+  .let.ges-E { background: #7A55BC; color: #fff; } .let.ges-F { background: #5E3AA2; color: #fff; } .let.ges-G { background: #412478; color: #fff; }
+
+  .bottom { margin-top: auto; margin-bottom: 40px; }
+  .cta { display: inline-flex; align-items: center; gap: 18px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 36px; letter-spacing: .06em; text-transform: uppercase; color: var(--navy-deep); background: var(--gold); padding: 16px 38px; border-radius: 8px; box-shadow: 0 6px 0 var(--gold-dark); }
+  .note { margin-top: 22px; font-size: 21px; line-height: 1.35; color: rgba(255,255,255,.7); max-width: 720px; white-space: pre-line; }
+
+  .footer { position: absolute; left: 0; right: 0; bottom: 0; height: var(--footer-h); background: var(--white); color: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); }
+  .footer img { height: 136px; width: auto; display: block; }
+  .footer .r { text-align: right; }
+  .footer .site { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .08em; text-transform: uppercase; }
+  .footer .slogan { margin-top: 6px; font-size: 24px; font-weight: 600; color: var(--gold-dark); }
+</style>
+</head>
+<body>
+  <div class="diag"><div class="gold"></div><div class="white"></div></div>
+  <section class="content">
+    <div class="kicker" data-if="kicker">{{kicker}}</div>
+    <h1>{{title}}</h1>
+    <table>
+      <tr data-if="row1_label"><td class="l">{{row1_label}}</td><td class="v gold">{{row1_value}}</td></tr>
+      <tr data-if="row2_label"><td class="l">{{row2_label}}</td><td class="v">{{row2_value}}</td></tr>
+      <tr data-if="row3_label"><td class="l">{{row3_label}}</td><td class="v">{{row3_value}}</td></tr>
+      <tr data-if="row4_label"><td class="l">{{row4_label}}</td><td class="v">{{row4_value}}</td></tr>
+      <tr data-if="row5_label"><td class="l">{{row5_label}}</td><td class="v">{{row5_value}}</td></tr>
+      <tr data-if="row6_label"><td class="l">{{row6_label}}</td><td class="v">{{row6_value}}</td></tr>
+    </table>
+    <div class="energy">
+      <div class="tag" data-if="dpe"><span class="lab">DPE</span><span class="let dpe-{{dpe}}">{{dpe}}</span></div>
+      <div class="tag" data-if="ges"><span class="lab">GES</span><span class="let ges-{{ges}}">{{ges}}</span></div>
+    </div>
+    <div class="bottom">
+      <div class="cta" data-if="cta">{{cta}} →</div>
+      <p class="note" data-if="note">{{note}}</p>
+    </div>
+  </section>
+  <footer class="footer">
+    <img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière">
+    <div class="r"><div class="site">{{site}}</div><div class="slogan">« vous c'est nous »</div></div>
+  </footer>
+</body>
+</html>

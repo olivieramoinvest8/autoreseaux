@@ -1,0 +1,52 @@
+<!--
+  templates/carrousel-photo.html — Slides 2 à 4 d'un carrousel d'annonce AMO Invest, 1080×1350.
+  Une photo plein cadre, une légende dans un bandeau bleu marine en bas, le numéro de la slide, le logo en petit.
+
+  Clés attendues :
+    photo      photo du bien (chemin relatif au dépôt ou URL)
+    photo_size, photo_position   cadrage facultatif, en CSS (ex. "auto 125%" et "center top")
+    step       numéro affiché en haut à droite ("2/5")
+    label      petit libellé doré au-dessus de la légende ("1er étage", "Rez-de-chaussée", "Extérieurs")
+    caption    légende en 1 à 3 lignes (faits vérifiés sur la fiche : surface, loyer en cours, équipements)
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — carrousel, photo</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+  :root { --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF; --pad: 72px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { position: relative; background: var(--navy-deep); color: var(--white); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .photo { position: absolute; inset: 0; background: url("{{photo}}") center / cover no-repeat; }
+  .step { position: absolute; right: var(--pad); top: 56px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .1em; color: var(--white); background: rgba(30,36,100,.85); padding: 10px 22px; border-radius: 999px; }
+
+  .band { position: absolute; left: 0; right: 0; bottom: 0; padding: 48px var(--pad) 56px; background: linear-gradient(160deg, #2E358D 0%, #1E2464 100%); border-top: 8px solid var(--gold); display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; }
+  .band .txt { flex: 1 1 auto; }
+  .label { font-family: "Oswald", sans-serif; font-weight: 500; font-size: 28px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .caption { margin-top: 14px; font-size: 34px; line-height: 1.35; font-weight: 600; white-space: pre-line; max-width: 760px; }
+  .logo { flex: 0 0 auto; background: var(--white); border-radius: 8px; padding: 10px 14px; }
+  .logo img { height: 84px; width: auto; display: block; }
+</style>
+<style data-if="photo_size">.photo { background-size: {{photo_size}}; }</style>
+<style data-if="photo_position">.photo { background-position: {{photo_position}}; }</style>
+</head>
+<body>
+  <div class="photo"></div>
+  <div class="step" data-if="step">{{step}}</div>
+  <section class="band">
+    <div class="txt">
+      <div class="label" data-if="label">{{label}}</div>
+      <p class="caption">{{caption}}</p>
+    </div>
+    <div class="logo"><img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest"></div>
+  </section>
+</body>
+</html>

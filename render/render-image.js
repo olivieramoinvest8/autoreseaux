@@ -10,11 +10,13 @@
  *   --data      fichier JSON dont les clés remplacent les {{cle}} du template (défaut : aucun)
  *   --out       chemin du PNG à produire (défaut : output/<nom-du-template>-<horodatage>.png)
  *   --scale     facteur de résolution, 1 = taille native (défaut : 1)
+ *   --format    png (défaut) ou jpeg ; --quality 1 à 100 pour le jpeg (défaut : 90)
  *   --set cle=valeur   surcharge une clé sans passer par un fichier JSON (répétable)
  *
  * Fonctionnement :
  *   1. Lit le template et remplace chaque {{cle}} par la valeur correspondante (échappée pour le HTML,
- *      sauts de ligne conservés). Une clé absente devient une chaîne vide.
+ *      sauts de ligne conservés). Une clé absente devient une chaîne vide. Une valeur qui est un chemin
+ *      d'image relatif au dépôt (output/assets/458/photo-1.jpg) est convertie en adresse file:// absolue.
  *   2. Supprime tout élément portant data-if="cle" si la valeur de cette clé est vide,
  *      ce qui permet des blocs optionnels (chiffre-clé, image de fond...).
  *   3. Lit la taille du visuel dans <meta name="render-size" content="1080x1350"> (défaut 1080×1350).
@@ -31,7 +33,7 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 
 function parseArgs(argv) {
-  const args = { template: "templates/post-feed.html", data: null, out: null, scale: 1, set: {} };
+  const args = { template: "templates/post-feed.html", data: null, out: null, scale: 1, format: "png", quality: 90, set: {} };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];
@@ -39,6 +41,8 @@ function parseArgs(argv) {
     else if (a === "--data") args.data = next();
     else if (a === "--out") args.out = next();
     else if (a === "--scale") args.scale = Number(next());
+    else if (a === "--format") args.format = next();
+    else if (a === "--quality") args.quality = Number(next());
     else if (a === "--set") {
       const kv = next() || "";
       const eq = kv.indexOf("=");
@@ -98,11 +102,13 @@ async function render(opts) {
   }
   Object.assign(data, opts.set);
 
-  // Une image de fond donnée en chemin relatif au dépôt devient un chemin absolu file://.
-  if (data.bg_image && !/^(https?:|data:|file:)/.test(data.bg_image)) {
-    const abs = path.resolve(ROOT, data.bg_image);
-    if (!fs.existsSync(abs)) throw new Error(`Image de fond introuvable : ${abs}`);
-    data.bg_image = "file://" + abs;
+  // Toute image donnée en chemin relatif au dépôt (bg_image, photo_main, photo_1, object_image…) devient
+  // un chemin absolu file:// : c'est ce qui permet à Chromium de la charger depuis le fichier temporaire.
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string" || !/\.(png|jpe?g|webp|gif|svg)$/i.test(value) || /^(https?:|data:|file:)/.test(value)) continue;
+    const abs = path.resolve(ROOT, value);
+    if (!fs.existsSync(abs)) throw new Error(`Image introuvable pour « ${key} » : ${abs}`);
+    data[key] = "file://" + abs;
   }
 
   const raw = fs.readFileSync(templatePath, "utf8");
@@ -137,7 +143,8 @@ async function render(opts) {
     );
     if (broken.length) console.warn("Images non chargées :", broken.join(", "));
     await page.waitForTimeout(150);
-    await page.screenshot({ path: outPath, type: "png", clip: { x: 0, y: 0, ...size } });
+    const jpeg = (opts.format || "png") === "jpeg" || /\.jpe?g$/i.test(outPath);
+    await page.screenshot({ path: outPath, type: jpeg ? "jpeg" : "png", ...(jpeg ? { quality: opts.quality || 90 } : {}), clip: { x: 0, y: 0, ...size } });
   } finally {
     await browser.close();
     fs.rmSync(tmpPath, { force: true });
@@ -149,7 +156,7 @@ if (require.main === module) {
   const opts = parseArgs(process.argv.slice(2));
   render(opts)
     .then(({ outPath, size }) => {
-      console.log(`PNG produit : ${path.relative(ROOT, outPath)} (${size.width}×${size.height})`);
+      console.log(`Image produite : ${path.relative(ROOT, outPath)} (${size.width}×${size.height})`);
     })
     .catch((err) => {
       console.error("Échec du rendu :", err.message);

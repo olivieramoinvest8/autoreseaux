@@ -1,0 +1,21 @@
+{
+  "_doc": "Post prêt pour scripts/publish-to-supabase.js (création 2). Assets : output/creations/carrousel-447-1.png à -5.png (media_url = slide 1, extra_media = slides 2 à 5). Bien réf. 447.",
+  "slot": "11h",
+  "type": "image",
+  "segment": "investisseurs",
+  "theme": "annonce : immeuble de deux appartements loués, Cavaillon (réf. 447)",
+  "listing_id": "33a22bfa-e406-47be-b26e-8d9e21ec04c9",
+  "networks": ["facebook", "instagram"],
+  "text_fb": "Pour un investisseur, le bien qui se comprend en une ligne : un immeuble de ville à Cavaillon, deux appartements indépendants, deux baux en cours.\n\n• 1er étage : T3 de 61,56 m², loué 610 € net par mois.\n• Rez-de-chaussée : T2 de 44,54 m² rénové récemment, terrasse, loué 650 € net par mois.\n• Cave commune, cage d'escalier en excellent état, climatisation réversible. DPE D, GES B. Taxe foncière : 1 327 € par an.\n\n236 000 €, honoraires TTC inclus.\n\nNous ne publions pas de rendement : il dépend de vos frais, de vos travaux et de votre fiscalité. On le calcule avec vous, chiffres réels à l'appui.\n\nFiche complète : https://www.amoinvest.fr/vente/109-cavaillon/maison/447-special-investisseurs-a-vendre-immeuble-de-ville-deux-appartements-cavaillon-84300-236-000-euros",
+  "text_ig": "Cavaillon : immeuble de deux appartements, déjà loués (610 € et 650 € net par mois). T3 au 1er, T2 rénové au rez-de-chaussée avec terrasse. DPE D / GES B.\n236 000 €, honoraires TTC inclus.\nLe rendement ? Il se calcule avec vos chiffres, pas avec une promesse. Parlons-en. Fiche complète : lien en bio, réf. 447.",
+  "hashtags": ["#investissementlocatif", "#Cavaillon", "#Vaucluse", "#immeuble", "#investisseur", "#immobilier", "#Provence", "#avendre", "#rendementlocatif", "#AMOInvest", "#agenceimmobiliere", "#Graveson"],
+  "features": {
+    "accroche": "démonstration",
+    "format": "carrousel 5 slides",
+    "sujet": "annonce investisseur",
+    "presentateur": false,
+    "cta": "parlons-en",
+    "photos": "réelles (site)",
+    "ia": "aucune"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "_doc": "Création 1 — affiche annonce, bien réf. 458 (duplex Graveson, exclusivité). Données lues sur amoinvest.fr le 8 septembre 2026, rien d'inventé.",
+  "photo_main": "output/assets/458/photo-4.jpg",
+  "photo_1": "output/assets/458/photo-1.jpg",
+  "photo_2": "output/assets/458/photo-3.jpg",
+  "photo_3": "output/assets/458/photo-7.jpg",
+  "badge": "Exclusivité",
+  "kicker": "À vendre · Graveson",
+  "title": "Duplex 224 m² avec jardin privatif",
+  "price": "339 000 €",
+  "fees": "Honoraires TTC inclus",
+  "spec_1": "6 pièces",
+  "spec_2": "4 chambres",
+  "spec_3": "170 m² Carrez",
+  "spec_4": "3 parkings",
+  "dpe": "B",
+  "ges": "A",
+  "ref": "Réf. 458",
+  "site": "amoinvest.fr"
+}

@@ -1,0 +1,133 @@
+<!--
+  templates/annonce-story.html — Affiche d'annonce AMO Invest, 1080×1920 (story / reel Instagram et Facebook, 9:16). Mêmes clés que annonce-feed.html.
+  Rempli par render/render-image.js (chaque {{cle}} est remplacé, tout élément data-if="cle" disparaît si la clé est vide).
+
+  Composition (catalogue de l'atelier visuel) : photo principale pleine largeur, bandeau bleu marine coupé en
+  diagonale, prix en relief doré, ville, surface, pièces, DPE et GES en pastilles, trois vignettes photos,
+  logo dans le cartouche blanc, référence et adresse du site.
+
+  Clés attendues :
+    photo_main            photo principale (chemin relatif au dépôt ou URL) — uniquement une photo du bien sous mandat
+    photo_1, photo_2, photo_3   vignettes (facultatives : le bloc disparaît si photo_1 est vide)
+    badge                 mention en haut à gauche ("Exclusivité", "Nouveauté", "Coup de cœur") — facultatif
+    kicker                ligne d'accroche au-dessus du titre ("À vendre · Graveson")
+    title                 titre en 1 ou 2 lignes (majuscules automatiques) : "Duplex 224 m² avec jardin privatif"
+    price                 "339 000 €"  (ou "695 € / mois" en location)
+    fees                  mention obligatoire des honoraires, telle qu'affichée sur le site
+    spec_1 … spec_4       caractéristiques courtes ("6 pièces", "4 chambres", "170 m² Carrez", "3 parkings")
+    dpe, ges              classes A à G — jamais inventées ; si absentes, les pastilles n'apparaissent pas
+    ref                   référence de l'annonce ("Réf. 458")
+    site                  "amoinvest.fr"
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1920">
+<title>AMO Invest — affiche annonce (story)</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+
+  :root {
+    --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF;
+    --pad: 72px; --photo-h: 1000px; --footer-h: 210px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { position: relative; background: var(--navy-deep); color: var(--white); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  /* 1. Photo principale, coupée en diagonale en bas */
+  .photo { position: absolute; left: 0; top: 0; width: 1080px; height: calc(var(--photo-h) + 90px);
+    background: url("{{photo_main}}") center / cover no-repeat;
+    clip-path: polygon(0 0, 1080px 0, 1080px 920px, 0 1000px); }
+  .photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,24,70,.28) 0%, rgba(20,24,70,0) 35%); }
+  .cut { position: absolute; left: 0; top: 0; width: 1080px; height: 1080px; background: var(--gold);
+    clip-path: polygon(0 1000px, 1080px 920px, 1080px 934px, 0 1014px); }
+
+  .badge { position: absolute; left: var(--pad); top: 200px; background: var(--gold); color: var(--navy-deep);
+    font-family: "Oswald", sans-serif; font-weight: 700; font-size: 30px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 12px 26px; border-radius: 6px; box-shadow: 0 6px 0 var(--gold-dark); }
+
+  /* 2. Bloc bleu marine */
+  .block { position: absolute; left: 0; right: 0; top: 934px; bottom: var(--footer-h);
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); }
+  .block .diag { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .block .diag .w { position: absolute; inset: 0; background: rgba(255,255,255,.10); clip-path: polygon(1040px 0, 1080px 0, 1080px 100%, 940px 100%); }
+
+  .inner { position: absolute; left: var(--pad); right: var(--pad); top: 56px; bottom: 0; display: flex; flex-direction: column; }
+
+  .kicker { display: flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 28px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .kicker::before { content: ""; width: 48px; height: 4px; background: var(--gold); }
+  h1 { margin-top: 16px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 66px; line-height: 1.06; text-transform: uppercase; letter-spacing: .01em; max-width: 900px; }
+
+  .specs { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; max-width: 900px; }
+  .specs span { font-family: "Oswald", sans-serif; font-weight: 500; font-size: 26px; letter-spacing: .04em; text-transform: uppercase;
+    border: 2px solid rgba(255,255,255,.45); border-radius: 6px; padding: 6px 14px; color: rgba(255,255,255,.95); }
+
+  .right { margin-top: 34px; display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 30px; }
+  .right .energy { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; }
+  .price { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 86px; line-height: 1; color: var(--gold); white-space: nowrap;
+    text-shadow: 0 2px 0 var(--gold-dark), 0 4px 0 #C99E14, 0 6px 0 #A8830E, 0 12px 24px rgba(0,0,0,.45); }
+  .fees { margin-top: 20px; font-size: 22px; font-weight: 600; color: rgba(255,255,255,.85); line-height: 1.3; max-width: 380px; }
+
+  .energy { margin-top: 22px; display: flex; gap: 14px; }
+  .energy .tag { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .energy .lab { font-family: "Oswald", sans-serif; font-size: 20px; letter-spacing: .14em; color: rgba(255,255,255,.75); }
+  .energy .let { width: 74px; height: 74px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-family: "Oswald", sans-serif; font-weight: 700; font-size: 44px; color: #1A1A1A; background: #CCCCCC; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  /* Couleurs de l'étiquette énergie (DPE) et climat (GES) */
+  .let.dpe-A { background: #00A06D; color: #fff; } .let.dpe-B { background: #52B153; color: #fff; } .let.dpe-C { background: #A5CE4D; }
+  .let.dpe-D { background: #F4E70F; } .let.dpe-E { background: #F0B50F; } .let.dpe-F { background: #EB8235; color: #fff; } .let.dpe-G { background: #D7221F; color: #fff; }
+  .let.ges-A { background: #EDE5F6; } .let.ges-B { background: #D2C0EA; } .let.ges-C { background: #B49BDD; } .let.ges-D { background: #9676CE; color: #fff; }
+  .let.ges-E { background: #7A55BC; color: #fff; } .let.ges-F { background: #5E3AA2; color: #fff; } .let.ges-G { background: #412478; color: #fff; }
+
+  /* Vignettes : trois photos en bas du bloc */
+  .thumbs { position: absolute; left: var(--pad); right: var(--pad); bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; height: 200px; }
+  .thumbs div { background-position: center; background-size: cover; border: 4px solid var(--white); border-radius: 6px; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+  .thumbs .t1 { background-image: url("{{photo_1}}"); } .thumbs .t2 { background-image: url("{{photo_2}}"); } .thumbs .t3 { background-image: url("{{photo_3}}"); }
+
+  /* 3. Cartouche blanc */
+  .footer { position: absolute; left: 0; right: 0; bottom: 0; height: var(--footer-h); background: var(--white); color: var(--navy);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); }
+  .footer img { height: 150px; width: auto; display: block; }
+  .footer .r { text-align: right; }
+  .footer .site { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .08em; text-transform: uppercase; }
+  .footer .ref { margin-top: 6px; font-size: 24px; font-weight: 600; color: var(--gold-dark); }
+</style>
+</head>
+<body>
+  <div class="photo"></div>
+  <div class="cut"></div>
+  <div class="badge" data-if="badge">{{badge}}</div>
+
+  <section class="block">
+    <div class="diag"><div class="w"></div></div>
+    <div class="inner">
+      <div class="left">
+        <div class="kicker" data-if="kicker">{{kicker}}</div>
+        <h1>{{title}}</h1>
+        <div class="specs">
+          <span data-if="spec_1">{{spec_1}}</span><span data-if="spec_2">{{spec_2}}</span><span data-if="spec_3">{{spec_3}}</span><span data-if="spec_4">{{spec_4}}</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="price">{{price}}</div>
+        <div class="fees" data-if="fees">{{fees}}</div>
+        <div class="energy">
+          <div class="tag" data-if="dpe"><span class="lab">DPE</span><span class="let dpe-{{dpe}}">{{dpe}}</span></div>
+          <div class="tag" data-if="ges"><span class="lab">GES</span><span class="let ges-{{ges}}">{{ges}}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="thumbs" data-if="photo_1"><div class="t1"></div><div class="t2"></div><div class="t3"></div></div>
+  </section>
+
+  <footer class="footer">
+    <img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière">
+    <div class="r"><div class="site">{{site}}</div><div class="ref">{{ref}} · « vous c'est nous »</div></div>
+  </footer>
+</body>
+</html>

@@ -17,17 +17,18 @@ Document écrit le 8 septembre 2026 pour qu'une nouvelle conversation Claude Cod
 | Base Supabase, projet **« Communication »** (`milxjogpfpwipigdfyeb`), schéma `social` | Appliqué, exposé à l'API, droits posés | `supabase/schema.sql` |
 | Site Netlify **`communicationsocial`** (id `aa002809-08e7-41c6-8c73-840bbb7e974a`) relié au dépôt | Déployé, 13 fonctions, 2 tâches planifiées | `netlify.toml`, `netlify/` |
 | Tableau de bord privé https://communicationsocial.netlify.app | **Testé OK** par Olivier : connexion, lecture du site, dépôt | `netlify/site/` |
-| Lecteur d'annonces amoinvest.fr → `social.listings` | 50 fiches lues (43 ventes, 7 locations). Prix, surface, pièces, ville, photos OK. **À calibrer** : titres, DPE/GES, honoraires | `netlify/functions/_lib/listings.js` |
+| Lecteur d'annonces amoinvest.fr → `social.listings` | **Calibré le 8 sept. (session 2)** : titre, DPE/GES par bulles (31 fiches sur 51), honoraires, photos propres, description dans `raw`. En base : encore l'ancienne lecture tant que la poussée n'est pas faite, puis « Relire le site maintenant » | `netlify/functions/_lib/listings.js` |
 | Fonctions : liens Valider/Refuser, publication Meta/YouTube/TikTok, OAuth Google et TikTok, renouvellement jeton Meta | Déployées, **non testées** (les applications Meta/Google/TikTok n'existent pas encore) | `netlify/functions/` |
 | Script des routines (upload + insert draft + texte du mail) | Écrit, non testé en réel | `scripts/publish-to-supabase.js` |
 | Chartes des trois marques | Écrites | `brands/*/charte.md` |
+| **Atelier visuel v1** : affiche annonce (feed + story), carrousel 5 slides, pédagogie premium ; scripts carrousel et téléchargement ; relais d'images Supabase `fetch-image` | Construit, **3 créations réelles montrées à Olivier le 8 sept.**, en attente de ses corrections puis d'une poussée | `templates/`, `render/`, `content/runs/`, `docs/atelier-visuel.md` §6 |
 | Documentation : architecture v2.1, parcours de l'idée à la diffusion (XMind), atelier visuel, liste à faire | Écrites | `docs/` |
 
 Variables Netlify posées : `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (par Olivier), `DASHBOARD_PASSWORD` (choisi par Olivier), `DASHBOARD_URL`, `INTERNAL_SECRET`, `SITE_BASE_URL`. Manquent : `META_*`, `GOOGLE_*`, `TIKTOK_*`.
 
 Connecteurs disponibles dans l'environnement : GitHub, Supabase, Netlify, Gmail, Google Calendar, Windsor.ai, Cloudflare, **Higgsfield** (plan Plus, ≈ 1 200 crédits/mois). Non connectés pour l'instant : ElevenLabs, Canva.
 
-Réseau de l'environnement : Olivier a reçu la marche à suivre pour passer en « Personnalisé » avec `amoinvest.fr`, `www.amoinvest.fr`, `*.supabase.co`, `*.netlify.app` et la liste par défaut cochée. **Vérifier en début de session** avec un `curl -I https://www.amoinvest.fr` : si ça répond, les tests de bout en bout sont possibles depuis la session.
+Réseau de l'environnement : vérifié le 8 sept. (session 2), `curl -I https://www.amoinvest.fr` répond 200 ; Supabase et Netlify passent. **Bloqués** : `amoinvest.staticlbi.com` (photos des biens) et `*.cloudfront.net` (rendus Higgsfield). À ajouter à la liste blanche ; en attendant, `render/fetch-media.js` passe par la fonction Supabase `fetch-image`.
 
 ## 3. Décisions prises (ne pas rouvrir sans Olivier)
 - Trois marques : AMO Invest (Facebook + Instagram), chaîne tech/IA (YouTube + TikTok, nom à choisir), basket (TikTok au nom d'Olivier, fils de 14 ans, prénom seul).
@@ -41,7 +42,7 @@ Réseau de l'environnement : Olivier a reçu la marche à suivre pour passer en 
 
 ## 4. Ordre des prochaines étapes
 1. **Vérifier le réseau** de la session (`curl -I https://www.amoinvest.fr`) et que Higgsfield répond.
-2. **Atelier visuel v1** : compositions AMO (affiche annonce, carrousel, pédagogie premium, événement), calibrage du lecteur (titre, DPE/GES, honoraires), dépôt par marque. Produire **trois créations AMO réelles** avec ses annonces, les montrer à Olivier, corriger, puis une seule poussée.
+2. **Atelier visuel v1** : fait en session 2 (affiche annonce feed + story, carrousel, pédagogie premium ; calibrage du lecteur). Trois créations réelles montrées à Olivier (réf. 458, réf. 447, « le prix juste se calcule »). **Reste** : ses corrections, le dépôt par marque, l'affiche événement, puis une seule poussée (« on pousse »), puis « Relire le site maintenant » dans le tableau de bord.
 3. **Application Meta** (Olivier, guidé écran par écran, 45 min) : étapes A à D décrites dans la conversation précédente, reprises ci-dessous.
 4. **Routine `amo-image`** (11h03 lun-sam, Paris) avec connecteurs GitHub, Supabase, Gmail, Higgsfield ; premier run à la main ; premier vrai post validé et publié sur Facebook et Instagram.
 5. Ensuite : vidéo AMO 18h, chaîne tech, basket, analytics.

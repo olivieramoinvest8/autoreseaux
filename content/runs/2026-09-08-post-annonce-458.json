@@ -1,0 +1,21 @@
+{
+  "_doc": "Post prêt pour scripts/publish-to-supabase.js (création 1). Asset : output/creations/annonce-458-feed.png (+ story). Bien réf. 458, listing_id = ligne social.listings du bien.",
+  "slot": "11h",
+  "type": "image",
+  "segment": "acheteurs",
+  "theme": "annonce : duplex 224 m² Graveson (réf. 458)",
+  "listing_id": "454dacc7-e76c-4277-8369-bf0929a33bca",
+  "networks": ["facebook", "instagram"],
+  "text_fb": "Exclusivité AMO Invest à Graveson : un duplex de 224 m² habitables (170 m² Carrez) au 1er étage d'une copropriété de deux lots, avec jardin privatif et grande terrasse couverte.\n\nSalon-séjour de plus de 70 m² avec cuisine ouverte équipée, 4 chambres, 2 salles d'eau, 3 places de parking. Rénovation récente, double vitrage, climatisation réversible. DPE B, GES A.\n\n339 000 €, honoraires TTC inclus.\n\nLa fiche complète, avec toutes les photos, est sur amoinvest.fr : https://www.amoinvest.fr/vente/1-graveson/duplex/458-appartement-duplex-224-m-habitables-terrain-408-m-excellent-etat\n\nVisite sur rendez-vous. Écrivez-nous.",
+  "text_ig": "Exclusivité à Graveson : duplex de 224 m² habitables (170 m² Carrez), jardin privatif, terrasse couverte, 4 chambres, 3 parkings. Rénové récemment, DPE B / GES A.\n339 000 €, honoraires TTC inclus.\nFiche complète et photos : lien en bio, réf. 458. Visite sur rendez-vous.",
+  "hashtags": ["#Graveson", "#immobilier", "#duplex", "#BouchesDuRhone", "#Provence", "#avendre", "#exclusivite", "#agenceimmobiliere", "#AMOInvest", "#maisonavecjardin", "#Alpilles", "#immobilierprovence"],
+  "features": {
+    "accroche": "annonce",
+    "format": "affiche annonce (feed + story)",
+    "sujet": "annonce exclusivité",
+    "presentateur": false,
+    "cta": "visite sur rendez-vous",
+    "photos": "réelles (site)",
+    "ia": "aucune"
+  }
+}

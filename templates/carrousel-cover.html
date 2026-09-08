@@ -1,0 +1,75 @@
+<!--
+  templates/carrousel-cover.html — Slide 1 (couverture) d'un carrousel d'annonce AMO Invest, 1080×1350.
+  Photo plein cadre, voile bleu marine en bas, accroche, titre, prix en relief doré, invitation à faire défiler.
+
+  Clés attendues :
+    photo       photo du bien (chemin relatif au dépôt ou URL) — uniquement un bien sous mandat
+    photo_size, photo_position   cadrage facultatif, en CSS (ex. "auto 120%" et "center top" pour couper le bas d'une photo filigranée)
+    badge       mention facultative ("Spécial investisseurs", "Exclusivité")
+    kicker      "À vendre · Cavaillon"
+    title       titre 2 lignes maximum (majuscules automatiques)
+    price       "236 000 €"
+    fees        mention des honoraires telle qu'affichée sur le site
+    swipe       texte de l'invitation ("Faites défiler")
+    ref, site   "Réf. 447", "amoinvest.fr"
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — carrousel, couverture</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+  :root { --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF; --pad: 72px; --footer-h: 170px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { position: relative; background: var(--navy-deep); color: var(--white); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .photo { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; background: url("{{photo}}") center / cover no-repeat; }
+  .photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,24,70,.15) 0%, rgba(20,24,70,0) 26%, rgba(30,36,100,.5) 42%, rgba(30,36,100,.88) 62%, rgba(30,36,100,.97) 82%, rgba(30,36,100,.97) 100%); }
+
+  .diag { position: absolute; inset: 0; bottom: var(--footer-h); pointer-events: none; }
+  .diag .gold  { position: absolute; inset: 0; background: var(--gold); clip-path: polygon(1010px 0, 1036px 0, 826px 100%, 800px 100%); opacity: .95; }
+  .diag .white { position: absolute; inset: 0; background: rgba(255,255,255,.35); clip-path: polygon(1054px 0, 1066px 0, 856px 100%, 844px 100%); }
+
+  .badge { position: absolute; left: var(--pad); top: 60px; background: var(--gold); color: var(--navy-deep); font-family: "Oswald", sans-serif; font-weight: 700; font-size: 30px; letter-spacing: .14em; text-transform: uppercase; padding: 12px 26px; border-radius: 6px; box-shadow: 0 6px 0 var(--gold-dark); }
+
+  .content { position: absolute; left: var(--pad); right: var(--pad); bottom: calc(var(--footer-h) + 48px); max-width: 720px; }
+  .kicker { display: flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 28px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .kicker::before { content: ""; width: 48px; height: 4px; background: var(--gold); }
+  h1 { margin-top: 18px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 74px; line-height: 1.04; text-transform: uppercase; letter-spacing: .01em; text-shadow: 0 4px 18px rgba(0,0,0,.45); }
+  .price { margin-top: 26px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 92px; line-height: 1; color: var(--gold);
+    text-shadow: 0 2px 0 var(--gold-dark), 0 4px 0 #C99E14, 0 6px 0 #A8830E, 0 12px 24px rgba(0,0,0,.45); }
+  .fees { margin-top: 18px; font-size: 24px; font-weight: 600; color: rgba(255,255,255,.9); }
+  .swipe { margin-top: 30px; display: inline-flex; align-items: center; gap: 14px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .1em; text-transform: uppercase; color: var(--white); border: 2px solid rgba(255,255,255,.7); border-radius: 999px; padding: 10px 26px; }
+
+  .footer { position: absolute; left: 0; right: 0; bottom: 0; height: var(--footer-h); background: var(--white); color: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); }
+  .footer img { height: 124px; width: auto; display: block; }
+  .footer .r { text-align: right; }
+  .footer .site { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .08em; text-transform: uppercase; }
+  .footer .ref { margin-top: 6px; font-size: 24px; font-weight: 600; color: var(--gold-dark); }
+</style>
+<style data-if="photo_size">.photo { background-size: {{photo_size}}; }</style>
+<style data-if="photo_position">.photo { background-position: {{photo_position}}; }</style>
+</head>
+<body>
+  <div class="photo"></div>
+  <div class="diag"><div class="gold"></div><div class="white"></div></div>
+  <div class="badge" data-if="badge">{{badge}}</div>
+  <section class="content">
+    <div class="kicker" data-if="kicker">{{kicker}}</div>
+    <h1>{{title}}</h1>
+    <div class="price">{{price}}</div>
+    <div class="fees" data-if="fees">{{fees}}</div>
+    <div class="swipe" data-if="swipe">{{swipe}} →</div>
+  </section>
+  <footer class="footer">
+    <img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière">
+    <div class="r"><div class="site">{{site}}</div><div class="ref">{{ref}} · « vous c'est nous »</div></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!--
+  templates/pedagogie-premium.html — Visuel « pédagogie premium » AMO Invest, 1080×1350 (feed, 4:5).
+  Un objet 3D doré (maison, clé, pièces…) généré par Higgsfield sur fond bleu profond, un titre en relief doré,
+  une phrase de pédagogie, un appel à l'action sobre, le logo dans son cartouche blanc.
+
+  Règle : le texte est toujours posé ici, jamais généré dans l'image. L'image ne représente jamais un bien réel.
+
+  Clés attendues :
+    object_image   image 4:5 (1080×1350 ou plus grande) générée par Higgsfield, objet dans les deux tiers bas,
+                   espace libre en haut (chemin relatif au dépôt ou URL)
+    segment        "Vendeurs", "Investisseurs", "Acheteurs", "Bailleurs"
+    title          accroche courte en relief doré, 2 lignes maximum (majuscules automatiques ; un saut de ligne force la coupure)
+    subtitle       complément en blanc, 1 ligne
+    body           1 ou 2 phrases, posées en bas à droite
+    cta            appel à l'action sobre ("Estimation sur rendez-vous")
+    localisation   "Graveson · Bouches-du-Rhône"
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — pédagogie premium</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+  :root { --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF; --pad: 72px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { position: relative; background: var(--navy-deep); color: var(--white); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .bg { position: absolute; inset: 0; background: url("{{object_image}}") center top / cover no-repeat; }
+  /* Voile léger en haut pour la lisibilité du titre, et en bas pour le texte et le cartouche */
+  .bg::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,24,70,.55) 0%, rgba(20,24,70,0) 38%, rgba(20,24,70,0) 74%, rgba(20,24,70,.88) 100%); }
+
+  /* Diagonales signature, fines, hors des textes (à droite, dans la zone haute) */
+  .diag { position: absolute; inset: 0; pointer-events: none; }
+  .diag .gold  { position: absolute; inset: 0; background: var(--gold); opacity: .9; clip-path: polygon(1020px 0, 1040px 0, 900px 420px, 880px 420px); }
+  .diag .white { position: absolute; inset: 0; background: rgba(255,255,255,.35); clip-path: polygon(1062px 0, 1072px 0, 932px 420px, 922px 420px); }
+
+  .top { position: absolute; left: var(--pad); right: 200px; top: 64px; }
+  .kicker { display: flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  .kicker::before { content: ""; width: 56px; height: 4px; background: var(--gold); }
+  h1 { margin-top: 26px; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 104px; line-height: 1.0; text-transform: uppercase; letter-spacing: .01em; white-space: pre-line;
+    color: var(--gold);
+    /* Relief : ombres empilées vers le bas, puis ombre portée douce */
+    text-shadow: 0 2px 0 #D9B92A, 0 4px 0 #C9A81F, 0 6px 0 #B5951A, 0 8px 0 #9E8114, 0 10px 0 #85690F, 0 22px 30px rgba(0,0,0,.55); }
+  .subtitle { margin-top: 22px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 48px; line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; color: var(--white); text-shadow: 0 4px 18px rgba(0,0,0,.5); }
+
+  .bottom { position: absolute; left: var(--pad); right: var(--pad); bottom: 60px; display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; }
+  .card { flex: 0 0 auto; background: var(--white); border-radius: 10px; padding: 16px 22px; box-shadow: 0 12px 30px rgba(0,0,0,.4); }
+  .card img { height: 118px; width: auto; display: block; }
+  .text { flex: 0 1 620px; text-align: right; }
+  .body { font-size: 30px; line-height: 1.38; font-weight: 400; color: rgba(255,255,255,.95); text-shadow: 0 2px 10px rgba(0,0,0,.6); white-space: pre-line; }
+  .cta { margin-top: 22px; display: inline-flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 32px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--navy-deep); background: var(--gold); padding: 14px 32px; border-radius: 8px; box-shadow: 0 6px 0 var(--gold-dark); }
+  .loc { margin-top: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 24px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.8); }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="diag"><div class="gold"></div><div class="white"></div></div>
+
+  <header class="top">
+    <div class="kicker" data-if="segment">{{segment}}</div>
+    <h1>{{title}}</h1>
+    <div class="subtitle" data-if="subtitle">{{subtitle}}</div>
+  </header>
+
+  <section class="bottom">
+    <div class="card"><img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière"></div>
+    <div class="text">
+      <p class="body" data-if="body">{{body}}</p>
+      <div class="cta" data-if="cta">{{cta}} →</div>
+      <div class="loc" data-if="localisation">{{localisation}}</div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+  "_doc": "Création 2 — carrousel d'annonce (5 slides), bien réf. 447 (immeuble de deux appartements, Cavaillon). Faits lus sur la fiche amoinvest.fr le 8 septembre 2026 : surfaces, loyers en cours, taxe foncière, DPE/GES. Aucun rendement calculé ni promis.",
+  "slides": [
+    {
+      "template": "templates/carrousel-cover.html",
+      "out": "carrousel-447-1.png",
+      "data": {
+        "photo": "output/assets/447/photo-7.jpg",
+        "badge": "Spécial investisseurs",
+        "kicker": "À vendre · Cavaillon",
+        "title": "Immeuble de deux appartements, déjà loués",
+        "price": "236 000 €",
+        "fees": "Honoraires TTC inclus",
+        "swipe": "Faites défiler",
+        "ref": "Réf. 447",
+        "site": "amoinvest.fr",
+        "photo_size": "auto 1720px",
+        "photo_position": "center top"
+      }
+    },
+    {
+      "template": "templates/carrousel-photo.html",
+      "out": "carrousel-447-2.png",
+      "data": {
+        "photo": "output/assets/447/photo-1.jpg",
+        "step": "2/5",
+        "label": "Appartement du 1er étage",
+        "caption": "T3 de 61,56 m², lumineux.\nFenêtres PVC double vitrage, climatisation réversible.\nLoué 610 € net par mois."
+      }
+    },
+    {
+      "template": "templates/carrousel-photo.html",
+      "out": "carrousel-447-3.png",
+      "data": {
+        "photo": "output/assets/447/photo-5.jpg",
+        "step": "3/5",
+        "label": "Appartement du rez-de-chaussée",
+        "caption": "T2 de 44,54 m², entièrement rénové récemment.\nTerrasse à l'arrière, donnant sur la cuisine et une chambre.\nLoué 650 € net par mois."
+      }
+    },
+    {
+      "template": "templates/carrousel-photo.html",
+      "out": "carrousel-447-4.png",
+      "data": {
+        "photo": "output/assets/447/photo-6.jpg",
+        "step": "4/5",
+        "label": "Extérieurs et parties communes",
+        "caption": "Terrasse couverte au rez-de-chaussée, cave commune.\nCage d'escalier en excellent état.\nEn plein cœur de Cavaillon.",
+        "photo_size": "auto 1500px",
+        "photo_position": "center top"
+      }
+    },
+    {
+      "template": "templates/carrousel-infos.html",
+      "out": "carrousel-447-5.png",
+      "data": {
+        "kicker": "En résumé · Réf. 447",
+        "title": "Deux baux en cours, un seul achat",
+        "row1_label": "Prix de vente",
+        "row1_value": "236 000 €",
+        "row2_label": "Loyers actuels",
+        "row2_value": "1 260 € net / mois",
+        "row3_label": "Surface totale",
+        "row3_value": "106 m²",
+        "row4_label": "Taxe foncière",
+        "row4_value": "1 327 € / an",
+        "row5_label": "Chauffage",
+        "row5_value": "Climatisation réversible",
+        "dpe": "D",
+        "ges": "B",
+        "cta": "Parlons-en",
+        "note": "Honoraires TTC inclus dans le prix. Loyers et charges tels qu'indiqués sur la fiche du bien : la rentabilité se calcule avec vous, à partir de vos chiffres (frais, travaux, fiscalité).",
+        "site": "amoinvest.fr"
+      }
+    }
+  ]
+}

@@ -58,3 +58,30 @@ Règle : **le texte est toujours posé par la composition, jamais généré dans
 - Visages : votre fils détouré, oui ; autres joueurs reconnaissables, accord du club. Adversaires jamais nommés.
 - Génération d'images : coût en crédits Higgsfield ; le catalogue prévoit toujours une variante sans IA.
 - Le rendu final se fait sur GitHub Actions ou Netlify, dont le réseau est ouvert. L'environnement de Claude Code a un réseau restreint : il faut y autoriser amoinvest.fr, supabase.co et netlify.app pour que Claude teste lui-même de bout en bout.
+
+## 6. État de l'atelier v1 (8 septembre 2026, session 2)
+
+Ce qui existe et a été contrôlé visuellement sur trois créations réelles (biens réf. 458 et 447, thème « prix juste » du calendrier) :
+
+| Template | Format | Rôle | Clés principales |
+|---|---|---|---|
+| `templates/annonce-feed.html` | 1080×1350 | Affiche d'annonce : photo, diagonale, prix en relief, pastilles DPE/GES, 3 vignettes, cartouche logo | `photo_main`, `photo_1..3`, `badge`, `kicker`, `title`, `price`, `fees`, `spec_1..4`, `dpe`, `ges`, `ref`, `site` |
+| `templates/annonce-story.html` | 1080×1920 | Même affiche en story / reel | mêmes clés |
+| `templates/carrousel-cover.html` | 1080×1350 | Slide 1 d'un carrousel : photo plein cadre, titre, prix, « Faites défiler » | `photo`, `photo_size`, `photo_position`, `badge`, `kicker`, `title`, `price`, `fees`, `swipe`, `ref`, `site` |
+| `templates/carrousel-photo.html` | 1080×1350 | Slides photo + légende | `photo`, `step`, `label`, `caption` |
+| `templates/carrousel-infos.html` | 1080×1350 | Dernière slide : récapitulatif, DPE/GES, appel à l'action | `kicker`, `title`, `row1_label..row6_value`, `dpe`, `ges`, `cta`, `note`, `site` |
+| `templates/pedagogie-premium.html` | 1080×1350 | Objet 3D doré (Higgsfield) + titre en relief + phrase + CTA | `object_image`, `segment`, `title`, `subtitle`, `body`, `cta`, `localisation` |
+
+Scripts : `render/render-image.js` (un template → une image ; accepte maintenant tout chemin d'image relatif au dépôt et `--format jpeg`), `render/render-carousel.js` (un JSON `slides` → toutes les slides), `render/fetch-media.js` (télécharge photos et rendus, en direct ou via le relais).
+
+Exemples de données : `content/runs/2026-09-08-*.json` (données des visuels, et fichiers `post-*.json` avec textes Facebook / Instagram, hashtags et `features`, prêts pour `scripts/publish-to-supabase.js`). Rendus de référence : `output/examples/annonce-feed-458.png`, `carrousel-cover-447.png`, `pedagogie-premium-vendeurs.png`.
+
+Images générées réutilisables : `assets/generated/maison-or-podium.jpg` et `maison-or-contour.jpg` (Higgsfield, modèle Nano Banana Pro, 8 sept.). Une image générée sert de fond ou d'objet, jamais de bien réel ; le texte est toujours posé par le template.
+
+Règles apprises sur les vraies photos du site :
+- Les anciennes photos portent un filigrane « AMO Invest / cliches2.com » vers 70 à 80 % de la hauteur : le cacher sous le cartouche ou le bandeau avec `photo_size` (ex. `auto 1720px`) et `photo_position: center top`, ou choisir une autre photo. La passerelle Hektor apportera des photos propres.
+- Les photos sont en 1600 px de large : suffisant pour 1080×1350, juste pour la story.
+- Un texte clair posé sur une photo claire (toit, ciel) doit avoir un voile bleu dessous : les dégradés des templates montent jusqu'à 40 % de la hauteur.
+- DPE et GES ne sont posés que s'ils sont lus sur la fiche (bulle active) ; sinon les pastilles disparaissent d'elles-mêmes (`data-if`).
+
+Relais d'images : l'environnement Claude Code n'atteint que amoinvest.fr, Supabase et Netlify. La fonction Supabase `fetch-image` (projet Communication, lecture seule, hôtes limités à staticlbi.com, cloudfront.net, upload.higgsfield.ai et amoinvest.fr) sert de relais ; `render/fetch-media.js` l'appelle avec la clé publique du projet lue dans `.env` (voir `.env.example`). Le jour où `*.staticlbi.com` et `*.cloudfront.net` sont ajoutés à la liste blanche de l'environnement, le direct suffit et le relais n'est plus appelé.
