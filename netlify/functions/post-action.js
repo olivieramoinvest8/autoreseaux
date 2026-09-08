@@ -1,12 +1,15 @@
 /**
- * POST /api/post-action  { id, action: "approve" | "reject" | "update", texts?: {text_fb,…}, networks?: [] }
- * - update  : enregistre les textes modifiés dans le tableau de bord
- * - reject  : statut rejected
- * - approve : statut approved puis lance la publication en arrière-plan (publish-background)
+ * POST /api/post-action  { id, action, texts?: {text_fb,…}, networks?: [], scheduled_at? }
+ * - update     : enregistre les textes modifiés dans le tableau de bord
+ * - reject     : statut rejected
+ * - approve    : statut approved puis publication immédiate en arrière-plan (publish-background) ;
+ *                accepté aussi depuis error (relance) et approved programmé (« publier maintenant »)
+ * - schedule   : statut approved + scheduled_at (ISO, dans le futur) ; publish-scheduled publiera à l'heure
+ * - unschedule : annule la programmation ou l'erreur, retour en brouillon
  */
 const { supabase, logEvent } = require("./_lib/supabase");
 const { json, parseBody, requireDashboard, dashboardUrl } = require("./_lib/http");
-const { approvePost } = require("./_lib/publish");
+const { approvePost, unschedulePost } = require("./_lib/publish");
 
 exports.handler = async (event) => {
   const denied = requireDashboard(event);
@@ -33,6 +36,16 @@ exports.handler = async (event) => {
   }
   if (body.action === "approve") {
     const r = await approvePost(body.id, { via: "dashboard", baseUrl: dashboardUrl() });
+    return json(r.ok ? 200 : 400, r);
+  }
+  if (body.action === "schedule") {
+    if (!body.scheduled_at) return json(400, { error: "scheduled_at requis" });
+    const r = await approvePost(body.id, { via: "dashboard", baseUrl: dashboardUrl(), scheduledAt: body.scheduled_at });
+    if (r.ok && !r.scheduled_at) return json(400, { error: "L'heure choisie est déjà passée : utilisez « Publier maintenant »." });
+    return json(r.ok ? 200 : 400, r);
+  }
+  if (body.action === "unschedule") {
+    const r = await unschedulePost(body.id);
     return json(r.ok ? 200 : 400, r);
   }
   return json(400, { error: `action inconnue : ${body.action}` });

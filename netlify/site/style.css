@@ -50,3 +50,11 @@ th { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(-
 .event .lvl-error { color:var(--err); } .event .lvl-warn { color:var(--warn); }
 #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:6px; font-size:14px; z-index:10; max-width:90vw; }
 @media (max-width:600px) { .grid2 { grid-template-columns:1fr; } .event { grid-template-columns:1fr; } }
+
+/* Programmation et état d'un post */
+.state { margin: 8px 0 12px; padding: 10px 12px; border-radius: 6px; font-size: 14px; }
+.state.sched { background: #FFF7D6; border: 1px solid #E9CA31; color: #5C4A00; }
+.state.err { background: #FDECEC; border: 1px solid #E57373; color: #7A1F1F; }
+.sched-form { margin-top: 12px; padding: 12px; border: 1px dashed #D6D9E8; border-radius: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.sched-form input[type="datetime-local"] { padding: 8px; border: 1px solid #D6D9E8; border-radius: 4px; font: inherit; }
+.sched-form .hint { flex-basis: 100%; margin: 0; font-size: 13px; }

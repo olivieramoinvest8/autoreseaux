@@ -98,11 +98,13 @@ create table if not exists social.posts (
   external_ids   jsonb not null default '{}'::jsonb,     -- {facebook: id, instagram: id, youtube: id, tiktok: publish_id}
   error          text,
   approved_at    timestamptz,
+  scheduled_at   timestamptz,                            -- publication programmée (null = dès validation)
   published_at   timestamptz
 );
 create index if not exists posts_brand_created_idx on social.posts (brand_id, created_at desc);
 create index if not exists posts_status_idx        on social.posts (status);
 create index if not exists posts_theme_idx         on social.posts (theme);
+create index if not exists posts_scheduled_idx     on social.posts (status, scheduled_at);
 
 -- 5. Matchs de basket ---------------------------------------------------------------
 create table if not exists social.matches (

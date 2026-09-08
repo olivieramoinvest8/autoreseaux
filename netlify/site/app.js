@@ -47,44 +47,71 @@
     try {
       const { posts } = await api("api-posts?status=draft");
       $("#badge-posts").textContent = posts.length || "";
-      if (!posts.length) { box.innerHTML = '<p class="empty">Rien à valider pour le moment. Le prochain post arrive au prochain créneau.</p>'; return; }
+      if (!posts.length) { box.innerHTML = '<p class="empty">Rien à valider, rien de programmé, rien en erreur. Le prochain post arrive au prochain créneau.</p>'; return; }
       box.innerHTML = posts.map(renderPost).join("");
     } catch (e) { if (e.message !== "401") box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
   }
+  function fmtLocal(iso) { return iso ? new Date(iso).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : ""; }
+  /** Valeur par défaut du sélecteur : demain 11h03 (créneau image AMO), heure locale, au format datetime-local. */
+  function defaultSlot() { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(11, 3, 0, 0); const z = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; }
+
   function renderPost(p) {
     const brand = p.brand || {}; const nets = p.networks && p.networks.length ? p.networks : brand.networks || [];
     const fields = Array.from(new Set(nets.map((n) => NET_FIELD[n]).filter(Boolean)));
     const media = p.media_url ? (isVideo(p) ? `<video class="media" src="${esc(p.media_url)}" controls playsinline preload="metadata"></video>` : `<img class="media" src="${esc(p.media_url)}" alt="">`) : "";
-    return `<article class="card post" id="post-${p.id}" data-id="${p.id}">
+    const scheduled = p.status === "approved" && p.scheduled_at;
+    const state = scheduled ? `<p class="state sched">Programmé : ${esc(fmtLocal(p.scheduled_at))}. Sera publié dans les 10 minutes qui suivent.</p>`
+      : p.status === "error" ? `<p class="state err">Échec de publication : ${esc(p.error || "cause inconnue")}. Corrigez si besoin, puis relancez.</p>` : "";
+    const mainBtn = scheduled ? `<button class="gold act" data-action="approve">Publier maintenant</button>`
+      : p.status === "error" ? `<button class="gold act" data-action="approve">Relancer la publication</button>`
+      : `<button class="gold act" data-action="approve">Valider et publier</button>`;
+    return `<article class="card post" id="post-${p.id}" data-id="${p.id}" data-status="${esc(p.status)}">
       <div class="head"><div><span class="tag ${esc(brand.slug)}">${esc(brand.name || "")}</span> <span class="meta">${esc(p.slot)} · ${esc(p.type)} · ${fmtDate(p.created_at)}</span></div>
         <div class="meta">${nets.map(esc).join(" · ")}</div></div>
+      ${state}
       ${media}
       <div class="texts">${fields.map((f) => `<div class="text"><label>${NET_LABEL[f]} <button type="button" class="ghost copy" data-field="${f}">Copier</button></label><textarea data-field="${f}">${esc(p[f])}</textarea></div>`).join("")}
         ${p.hashtags && p.hashtags.length ? `<div class="text"><label>Hashtags <button type="button" class="ghost copy" data-field="hashtags">Copier</button></label><textarea data-field="hashtags">${esc(p.hashtags.map((h) => (h.startsWith("#") ? h : "#" + h)).join(" "))}</textarea></div>` : ""}
       </div>
       <div class="actions">
-        <button class="gold act" data-action="approve">Valider et publier</button>
+        ${mainBtn}
+        <button class="ghost act" data-action="schedule-open">${scheduled ? "Changer l'heure" : "Programmer…"}</button>
         <button class="ghost act" data-action="update">Enregistrer les modifications</button>
         ${p.media_url ? `<a class="ghost" href="${esc(p.media_url)}" download target="_blank" rel="noopener"><button type="button" class="ghost">Télécharger</button></a>` : ""}
+        ${scheduled || p.status === "error" ? `<button class="ghost act" data-action="unschedule">Remettre en brouillon</button>` : ""}
         <button class="danger act" data-action="reject">Refuser</button>
         <span class="status"></span>
+      </div>
+      <div class="sched-form" hidden>
+        <label>Publier le <input type="datetime-local" data-sched value="${scheduled ? esc(p.scheduled_at.slice(0, 16)) : defaultSlot()}" step="60"></label>
+        <button type="button" class="gold act" data-action="schedule">Programmer</button>
+        <button type="button" class="ghost act" data-action="schedule-close">Annuler</button>
+        <span class="hint">Heure de votre appareil. La publication part dans les 10 minutes qui suivent.</span>
       </div></article>`;
   }
   $("#posts").addEventListener("click", async (e) => {
     const copy = e.target.closest("button.copy");
     if (copy) { const ta = $(`textarea[data-field="${copy.dataset.field}"]`, copy.closest(".post")); try { await navigator.clipboard.writeText(ta.value); toast("Texte copié"); } catch { ta.select(); } return; }
     const btn = e.target.closest("button.act"); if (!btn) return;
-    const card = btn.closest(".post"); const id = card.dataset.id; const status = $(".status", card);
+    const card = btn.closest(".post"); const id = card.dataset.id; const status = $(".status", card); const action = btn.dataset.action;
+    if (action === "schedule-open") { const f = $(".sched-form", card); f.hidden = false; const inp = $("[data-sched]", f); if (inp && !inp.value) inp.value = defaultSlot(); return; }
+    if (action === "schedule-close") { $(".sched-form", card).hidden = true; return; }
     const texts = {}; $$("textarea[data-field]", card).forEach((ta) => { if (ta.dataset.field === "hashtags") texts.hashtags = ta.value.split(/\s+/).filter(Boolean); else texts[ta.dataset.field] = ta.value; });
-    let body = { id, action: btn.dataset.action, ...texts };
-    if (btn.dataset.action === "approve" && !confirm("Valider ce post ? Il partira sur les réseaux de la marque.")) return;
-    if (btn.dataset.action === "reject") { const reason = prompt("Pourquoi ? (facultatif, aide le robot à s'améliorer)") ; body.reason = reason || null; }
-    if (btn.dataset.action === "approve") { await api("post-action", { method: "POST", body: JSON.stringify({ id, action: "update", ...texts }) }).catch(() => {}); }
+    let body = { id, action, ...texts };
+    if (action === "approve" && !confirm(card.dataset.status === "error" ? "Relancer la publication de ce post ?" : "Publier ce post maintenant ? Il partira sur les réseaux de la marque.")) return;
+    if (action === "schedule") {
+      const v = $("[data-sched]", card).value; if (!v) { status.textContent = "Choisissez une date et une heure."; return; }
+      const when = new Date(v); if (when.getTime() < Date.now() + 60 * 1000) { status.textContent = "Cette heure est déjà passée."; return; }
+      if (!confirm(`Programmer ce post pour ${fmtLocal(when.toISOString())} ?`)) return;
+      body.scheduled_at = when.toISOString();
+    }
+    if (action === "reject") { const reason = prompt("Pourquoi ? (facultatif, aide le robot à s'améliorer)") ; body.reason = reason || null; }
+    if (action === "approve" || action === "schedule") { await api("post-action", { method: "POST", body: JSON.stringify({ id, action: "update", ...texts }) }).catch(() => {}); }
     $$("button", card).forEach((b) => (b.disabled = true)); status.textContent = "…";
     try {
       await api("post-action", { method: "POST", body: JSON.stringify(body) });
-      toast({ approve: "Validé, publication lancée", update: "Modifications enregistrées", reject: "Refusé" }[btn.dataset.action]);
-      if (btn.dataset.action === "update") { $$("button", card).forEach((b) => (b.disabled = false)); status.textContent = ""; } else loadPosts();
+      toast({ approve: "Validé, publication lancée", schedule: "Post programmé", unschedule: "Remis en brouillon", update: "Modifications enregistrées", reject: "Refusé" }[action]);
+      if (action === "update") { $$("button", card).forEach((b) => (b.disabled = false)); status.textContent = ""; } else loadPosts();
     } catch (err) { status.textContent = err.message; $$("button", card).forEach((b) => (b.disabled = false)); }
   });
   $("#reload-posts").addEventListener("click", loadPosts);

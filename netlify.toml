@@ -12,6 +12,10 @@
 [functions."read-listings"]
   schedule = "0 7 * * *"
 
+# Publication des posts programmes : toutes les 10 minutes.
+[functions."publish-scheduled"]
+  schedule = "*/10 * * * *"
+
 # Renouvellement du jeton Meta (60 jours) : verification hebdomadaire.
 [functions."refresh-tokens"]
   schedule = "0 6 * * 1"

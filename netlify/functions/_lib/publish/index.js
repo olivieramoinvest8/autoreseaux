@@ -1,6 +1,7 @@
 /**
  * Pipeline de publication.
- *  approveByToken / approvePost : passe le post en approved et déclenche publish-background.
+ *  approveByToken / approvePost : passe le post en approved et déclenche publish-background, ou le programme (scheduled_at).
+ *  unschedulePost : annule une programmation (retour en brouillon). publishDue : publie les posts programmés dont l'heure est venue.
  *  publishPost : publie sur chaque réseau de la marque (Meta, YouTube, TikTok), met à jour le post.
  * Claude ne publie jamais : seule cette chaîne, après le clic d'Olivier, parle aux plateformes.
  */
@@ -25,15 +26,52 @@ async function trigger(id, baseUrl) {
   if (res.status !== 202 && res.status !== 200) await logEvent("netlify", "error", `publish-background a répondu ${res.status}`, null, id);
 }
 
-async function approvePost(id, { via, baseUrl }) {
+/**
+ * Valide un post. Sans scheduledAt : publication immédiate (publish-background). Avec scheduledAt dans le
+ * futur : le post attend en statut approved, publish-scheduled le publiera à l'heure dite.
+ * Accepté depuis draft (validation), error (relance) et approved (changement d'heure ou « publier maintenant »).
+ */
+async function approvePost(id, { via, baseUrl, scheduledAt }) {
   const post = await loadPost(id);
   if (!post) return { ok: false, error: "Post introuvable" };
-  if (post.status !== "draft") return { ok: false, error: `Ce post est déjà « ${post.status} »`, postId: id };
-  const { error } = await supabase().from("posts").update({ status: "approved", approved_at: new Date().toISOString(), approval_token: null }).eq("id", id);
+  if (!["draft", "error", "approved"].includes(post.status)) return { ok: false, error: `Ce post est déjà « ${post.status} »`, postId: id };
+  const when = scheduledAt ? new Date(scheduledAt) : null;
+  if (when && Number.isNaN(when.getTime())) return { ok: false, error: "Date de programmation invalide", postId: id };
+  const future = when && when.getTime() > Date.now() + 60 * 1000;
+  const patch = { status: "approved", approved_at: new Date().toISOString(), approval_token: null, error: null, scheduled_at: future ? when.toISOString() : null };
+  const { error } = await supabase().from("posts").update(patch).eq("id", id);
   if (error) return { ok: false, error: error.message, postId: id };
-  await logEvent("dashboard", "info", `Post validé (${via})`, null, id);
+  if (future) {
+    await logEvent("dashboard", "info", `Post programmé (${via}) pour ${when.toISOString()}`, { scheduled_at: when.toISOString() }, id);
+    return { ok: true, postId: id, scheduled_at: when.toISOString() };
+  }
+  await logEvent("dashboard", "info", `Post validé (${via})${post.status === "error" ? ", relance" : ""}`, null, id);
   await trigger(id, baseUrl);
   return { ok: true, postId: id };
+}
+
+/** Remet un post programmé (ou en erreur) en brouillon, sans le publier. */
+async function unschedulePost(id) {
+  const post = await loadPost(id);
+  if (!post) return { ok: false, error: "Post introuvable" };
+  if (!["approved", "error"].includes(post.status)) return { ok: false, error: `Ce post est « ${post.status} »`, postId: id };
+  const { error } = await supabase().from("posts").update({ status: "draft", scheduled_at: null, approved_at: null }).eq("id", id);
+  if (error) return { ok: false, error: error.message, postId: id };
+  await logEvent("dashboard", "info", "Programmation annulée, retour en brouillon", null, id);
+  return { ok: true, postId: id };
+}
+
+/** Lance la publication de tous les posts approved dont l'heure est venue. Appelé par publish-scheduled. */
+async function publishDue(baseUrl) {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase().from("posts").select("id, scheduled_at").eq("status", "approved").not("scheduled_at", "is", null).lte("scheduled_at", now).order("scheduled_at");
+  if (error) throw error;
+  for (const p of data || []) {
+    await supabase().from("posts").update({ scheduled_at: null }).eq("id", p.id); // évite un double envoi au passage suivant
+    await logEvent("netlify", "info", "Heure de publication atteinte", { scheduled_at: p.scheduled_at }, p.id);
+    await trigger(p.id, baseUrl);
+  }
+  return (data || []).length;
 }
 
 async function approveByToken(token, opts) {
@@ -50,6 +88,7 @@ async function publishPost(id) {
   const post = await loadPost(id);
   if (!post) return;
   if (post.status !== "approved") { await logEvent("netlify", "warn", `Publication ignorée : statut ${post.status}`, null, id); return; }
+  if (post.scheduled_at && new Date(post.scheduled_at).getTime() > Date.now() + 60 * 1000) { await logEvent("netlify", "warn", "Publication ignorée : programmée plus tard", { scheduled_at: post.scheduled_at }, id); return; }
   const networks = (post.networks && post.networks.length ? post.networks : post.brand.networks) || [];
   const external = { ...(post.external_ids || {}) };
   const errors = [];
@@ -76,4 +115,4 @@ async function publishPost(id) {
   await db.from("posts").update({ status, external_ids: external, error: errors.join(" | ") || null, published_at: done ? new Date().toISOString() : null }).eq("id", id);
 }
 
-module.exports = { approvePost, approveByToken, publishPost };
+module.exports = { approvePost, approveByToken, unschedulePost, publishDue, publishPost };
