@@ -50,7 +50,10 @@ async function launchBrowser() {
   if (process.env.RENDER_CHROME_PATH) {
     return puppeteer.launch({ executablePath: process.env.RENDER_CHROME_PATH, headless: true, args: ["--no-sandbox", "--disable-gpu", "--disable-background-networking", "--disable-component-update"] });
   }
-  const chromium = require("@sparticuz/chromium-min");
+  // Le paquet est écrit en ESM : selon l'empaqueteur, ses fonctions sont sur « default » ou à la racine.
+  const mod = require("@sparticuz/chromium-min");
+  const chromium = typeof mod.executablePath === "function" ? mod : mod.default;
+  if (!chromium || typeof chromium.executablePath !== "function") throw new Error("@sparticuz/chromium-min : export inattendu");
   return puppeteer.launch({
     args: puppeteer.defaultArgs({ args: chromium.args, headless: "shell" }),
     executablePath: await chromium.executablePath(CHROMIUM_PACK),
