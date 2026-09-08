@@ -189,6 +189,13 @@
     } catch (e) { if (e.message !== "401") $("#history").innerHTML = `<p class="err">${esc(e.message)}</p>`; }
   }
 
+  $("#meta-check").addEventListener("click", async () => {
+    const box = $("#meta-check-result"); box.hidden = false; box.textContent = "Vérification en cours…"; $("#meta-check").disabled = true;
+    try { const r = await api("api-meta-check"); box.textContent = (r.ok ? "Connexion Meta OK\n" : "Problème : " + (r.error || "droits manquants") + "\n") + JSON.stringify(r.details, null, 2); }
+    catch (e) { box.textContent = "Erreur : " + e.message; }
+    $("#meta-check").disabled = false;
+  });
+
   // ---------- Données d'exemple (mode démo) ----------
   function demoApi(path) {
     const brands = { "amo-invest": { slug: "amo-invest", name: "AMO Invest", networks: ["facebook", "instagram"] }, tech: { slug: "tech", name: "Chaîne tech / IA", networks: ["youtube", "tiktok"] } };
