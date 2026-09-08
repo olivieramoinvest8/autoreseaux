@@ -10,7 +10,7 @@ exports.handler = async (event) => {
   const denied = requireDashboard(event);
   if (denied) return denied;
   const status = (event.queryStringParameters || {}).status || "draft";
-  let q = supabase().from("posts").select("*, brand:brands(slug, name, networks)").order("created_at", { ascending: false });
+  let q = supabase().from("posts").select("*, brand:brands(slug, name, networks), listing:listings(id, title, url, photos)").order("created_at", { ascending: false });
   if (status === "draft") q = q.or("status.eq.draft,status.eq.error,and(status.eq.approved,scheduled_at.not.is.null)");
   else q = q.in("status", ["approved", "published", "partial", "rejected", "error"]).limit(60);
   const { data, error } = await q;

@@ -62,6 +62,14 @@
     const scheduled = p.status === "approved" && p.scheduled_at;
     const state = scheduled ? `<p class="state sched">Programmé : ${esc(fmtLocal(p.scheduled_at))}. Sera publié dans les 10 minutes qui suivent.</p>`
       : p.status === "error" ? `<p class="state err">Échec de publication : ${esc(p.error || "cause inconnue")}. Corrigez si besoin, puis relancez.</p>` : "";
+    const vis = p.features && p.features.visual; const lphotos = (p.listing && p.listing.photos) || [];
+    const chosen = vis && vis.data ? [vis.data.photo_main, vis.data.photo_1, vis.data.photo_2, vis.data.photo_3].filter(Boolean) : [];
+    const photoPicker = vis && vis.renders && lphotos.length ? `<details class="photos" ${vis.status === "rendering" ? "open" : ""}>
+        <summary>Photos du visuel${vis.status === "rendering" ? " · refabrication en cours…" : vis.status === "error" ? " · échec : " + esc(vis.error || "") : ""}</summary>
+        <p class="hint">Cliquez les photos dans l'ordre : la 1re devient la photo principale, les 3 suivantes les vignettes. Puis « Refaire le visuel » (une minute environ).</p>
+        <div class="strip">${lphotos.map((u) => { const i = chosen.indexOf(u); return `<button type="button" class="ph${i > -1 ? " on" : ""}" data-url="${esc(u)}"><img src="${esc(u)}" alt="" loading="lazy">${i > -1 ? `<b>${i === 0 ? "P" : i}</b>` : ""}</button>`; }).join("")}</div>
+        <div class="actions"><button type="button" class="gold act" data-action="rerender">Refaire le visuel</button><button type="button" class="ghost act" data-action="photos-reset">Tout désélectionner</button></div>
+      </details>` : "";
     const mainBtn = scheduled ? `<button class="gold act" data-action="approve">Publier maintenant</button>`
       : p.status === "error" ? `<button class="gold act" data-action="approve">Relancer la publication</button>`
       : `<button class="gold act" data-action="approve">Valider et publier</button>`;
@@ -70,6 +78,7 @@
         <div class="meta">${nets.map(esc).join(" · ")}</div></div>
       ${state}
       ${media}
+      ${photoPicker}
       <div class="texts">${fields.map((f) => `<div class="text"><label>${NET_LABEL[f]} <button type="button" class="ghost copy" data-field="${f}">Copier</button></label><textarea data-field="${f}">${esc(p[f])}</textarea></div>`).join("")}
         ${p.hashtags && p.hashtags.length ? `<div class="text"><label>Hashtags <button type="button" class="ghost copy" data-field="hashtags">Copier</button></label><textarea data-field="hashtags">${esc(p.hashtags.map((h) => (h.startsWith("#") ? h : "#" + h)).join(" "))}</textarea></div>` : ""}
       </div>
@@ -92,8 +101,26 @@
   $("#posts").addEventListener("click", async (e) => {
     const copy = e.target.closest("button.copy");
     if (copy) { const ta = $(`textarea[data-field="${copy.dataset.field}"]`, copy.closest(".post")); try { await navigator.clipboard.writeText(ta.value); toast("Texte copié"); } catch { ta.select(); } return; }
+    const ph = e.target.closest("button.ph");
+    if (ph) { // sélection ordonnée des photos : P puis 1, 2, 3
+      const strip = ph.closest(".strip"); const sel = $$("button.ph.on", strip);
+      if (ph.classList.contains("on")) { ph.classList.remove("on"); ph.querySelector("b") && ph.querySelector("b").remove(); }
+      else if (sel.length < 4) { ph.classList.add("on"); ph.insertAdjacentHTML("beforeend", "<b></b>"); }
+      $$("button.ph.on", strip).forEach((b, i) => { const l = b.querySelector("b") || b.appendChild(document.createElement("b")); l.textContent = i === 0 ? "P" : String(i); });
+      return;
+    }
     const btn = e.target.closest("button.act"); if (!btn) return;
     const card = btn.closest(".post"); const id = card.dataset.id; const status = $(".status", card); const action = btn.dataset.action;
+    if (action === "photos-reset") { $$("button.ph", card).forEach((b) => { b.classList.remove("on"); const l = b.querySelector("b"); if (l) l.remove(); }); return; }
+    if (action === "rerender") {
+      const photos = $$("button.ph.on", card).map((b) => b.dataset.url);
+      if (!photos.length) { toast("Cliquez d'abord la photo principale"); return; }
+      if (!confirm(`Refaire le visuel avec ${photos.length} photo${photos.length > 1 ? "s" : ""} ?`)) return;
+      $$("button", card).forEach((b) => (b.disabled = true));
+      try { await api("post-action", { method: "POST", body: JSON.stringify({ id, action: "rerender", photos }) }); toast("Refabrication lancée, une minute environ"); setTimeout(loadPosts, 45000); loadPosts(); }
+      catch (err) { toast("Erreur : " + err.message); $$("button", card).forEach((b) => (b.disabled = false)); }
+      return;
+    }
     if (action === "schedule-open") { const f = $(".sched-form", card); f.hidden = false; const inp = $("[data-sched]", f); if (inp && !inp.value) inp.value = defaultSlot(); return; }
     if (action === "schedule-close") { $(".sched-form", card).hidden = true; return; }
     const texts = {}; $$("textarea[data-field]", card).forEach((ta) => { if (ta.dataset.field === "hashtags") texts.hashtags = ta.value.split(/\s+/).filter(Boolean); else texts[ta.dataset.field] = ta.value; });

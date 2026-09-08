@@ -12,7 +12,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["brands/**"]
+  included_files = ["brands/**", "templates/*.html", "assets/fonts/**", "assets/brand/logo-amo-invest.png", "render/render-image.js"]
 
 # Lecture d'amoinvest.fr chaque matin a 7h UTC (9h Paris en ete, 8h en hiver).
 [functions."read-listings"]
