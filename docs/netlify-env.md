@@ -2,6 +2,8 @@
 
 À renseigner dans Netlify : Site configuration → Environment variables. Jamais dans le dépôt.
 
+Case « Contains secret values » : à cocher pour les clés et jetons. Les trois adresses publiques (`DASHBOARD_URL`, `SITE_BASE_URL`, `SUPABASE_URL`) peuvent l'être aussi, mais elles sont alors exclues du scanner de secrets dans `netlify.toml` (`SECRETS_SCAN_OMIT_KEYS`), sinon la construction échoue car ces adresses figurent dans la documentation et le code.
+
 État au 7 septembre 2026 : `SUPABASE_URL`, `DASHBOARD_URL`, `SITE_BASE_URL`, `INTERNAL_SECRET` et `DASHBOARD_PASSWORD` sont posées par Claude via le connecteur Netlify. Reste `SUPABASE_SERVICE_KEY`, que seul Olivier peut copier depuis Supabase.
 
 | Variable | Rôle | Où la trouver | Quand |

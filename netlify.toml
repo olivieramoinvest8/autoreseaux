@@ -4,6 +4,12 @@
   functions = "netlify/functions"
   command = "echo 'Site statique, rien a construire'"
 
+# Le scanner de secrets de Netlify verifie que les valeurs des variables "secret" n'apparaissent pas dans les fichiers.
+# Ces trois variables sont des adresses publiques (site, tableau de bord, projet Supabase) : on les exclut du scan.
+# Les vraies cles (SUPABASE_SERVICE_KEY, META_*, DASHBOARD_PASSWORD, INTERNAL_SECRET) restent scannees.
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "DASHBOARD_URL,SITE_BASE_URL,SUPABASE_URL"
+
 [functions]
   node_bundler = "esbuild"
   included_files = ["brands/**"]
