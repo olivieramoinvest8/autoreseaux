@@ -20,7 +20,9 @@ async function graphWith(token, path, params, method = "POST") {
 
 /**
  * Jeton de page effectif. META_PAGE_TOKEN peut être le jeton de la page elle-même, ou un jeton d'utilisateur
- * (système ou personne) qui administre la page : dans ce cas on demande à Meta le jeton de page correspondant.
+ * (système ou personne) qui administre la page : dans ce cas on cherche la page dans « /me/accounts », qui
+ * donne à la fois son jeton et les tâches accordées (CREATE_CONTENT = droit de publier). Une page absente
+ * de cette liste, ou sans CREATE_CONTENT, est signalée en clair plutôt que par le « (#200) » de Meta.
  */
 async function pageToken() {
   const configured = process.env.META_PAGE_TOKEN;
@@ -31,12 +33,31 @@ async function pageToken() {
   const me = await graphWith(configured, "/me", { fields: "id,name" }, "GET");
   let token = configured;
   if (me.id !== pageId) {
-    const page = await graphWith(configured, `/${pageId}`, { fields: "access_token" }, "GET");
-    if (!page.access_token) throw new Error(`le jeton configuré (${me.name}) ne donne pas accès au jeton de la page ${pageId}`);
-    token = page.access_token;
+    const found = await findPage(configured, pageId);
+    if (!found) throw new Error(`le jeton configuré (${me.name}) ne voit pas la page ${pageId} : générez-le à nouveau en donnant accès à la page AMO Invest (utilisateur système → « Attribuer des actifs », ou fenêtre Meta → « Modifier les paramètres »)`);
+    if (Array.isArray(found.tasks) && found.tasks.length && !found.tasks.includes("CREATE_CONTENT")) {
+      throw new Error(`le jeton configuré (${me.name}) voit la page ${found.name} mais sans le droit « Créer du contenu » (tâches : ${found.tasks.join(", ")})`);
+    }
+    if (!found.access_token) throw new Error(`le jeton configuré (${me.name}) ne donne pas accès au jeton de la page ${pageId}`);
+    token = found.access_token;
   }
   pageTokenCache = { token, forPage: pageId };
   return token;
+}
+
+/** Liste des pages visibles par un jeton d'utilisateur, avec leur jeton et leurs tâches. */
+async function listPages(userToken) {
+  const r = await graphWith(userToken, "/me/accounts", { fields: "id,name,access_token,tasks", limit: "100" }, "GET").catch(() => ({ data: [] }));
+  return Array.isArray(r.data) ? r.data : [];
+}
+
+/** Page cherchée dans /me/accounts ; sinon lecture directe de la page (certains jetons système ne listent pas leurs pages). */
+async function findPage(userToken, pageId) {
+  const pages = await listPages(userToken);
+  const hit = pages.find((p) => p.id === pageId);
+  if (hit) return hit;
+  const direct = await graphWith(userToken, `/${pageId}`, { fields: "id,name,access_token" }, "GET").catch(() => null);
+  return direct && direct.access_token ? { ...direct, tasks: [] } : null;
 }
 
 async function graph(path, params, method = "POST") {
@@ -111,6 +132,13 @@ async function check() {
   try {
     const me = await graphWith(configured, "/me", { fields: "id,name" }, "GET");
     out.details.jeton_configure = { id: me.id, name: me.name, type: me.id === META_PAGE_ID ? "page" : "utilisateur (système ou personne)" };
+    if (me.id !== META_PAGE_ID) {
+      const pages = await listPages(configured);
+      out.details.pages_visibles = pages.map((p) => ({ id: p.id, name: p.name, taches: p.tasks || [], cible: p.id === META_PAGE_ID }));
+      const cible = pages.find((p) => p.id === META_PAGE_ID);
+      if (!cible) out.details.alerte = `la page ${META_PAGE_ID} n'apparaît pas dans les pages accessibles à ce jeton`;
+      else if (Array.isArray(cible.tasks) && !cible.tasks.includes("CREATE_CONTENT")) out.details.alerte = `la page ${cible.name} est visible mais sans la tâche CREATE_CONTENT (droit « Créer du contenu »)`;
+    }
     const token = await pageToken();
     const page = await graphWith(token, `/${META_PAGE_ID}`, { fields: "id,name,instagram_business_account" }, "GET");
     out.details.page = { id: page.id, name: page.name, instagram_business_account: page.instagram_business_account && page.instagram_business_account.id };
