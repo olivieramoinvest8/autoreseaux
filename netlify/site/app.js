@@ -61,7 +61,8 @@
     const media = p.media_url ? (isVideo(p) ? `<video class="media" src="${esc(p.media_url)}" controls playsinline preload="metadata"></video>` : `<img class="media" src="${esc(p.media_url)}" alt="">`) : "";
     const scheduled = p.status === "approved" && p.scheduled_at;
     const state = scheduled ? `<p class="state sched">Programmé : ${esc(fmtLocal(p.scheduled_at))}. Sera publié dans les 10 minutes qui suivent.</p>`
-      : p.status === "error" ? `<p class="state err">Échec de publication : ${esc(p.error || "cause inconnue")}. Corrigez si besoin, puis relancez.</p>` : "";
+      : p.status === "error" ? `<p class="state err">Échec de publication : ${esc(p.error || "cause inconnue")}. Corrigez si besoin, puis relancez.</p>`
+      : p.status === "partial" ? `<p class="state err">Publié sur ${esc(Object.keys(p.external_ids || {}).join(", ") || "?")}, échec sur le reste : ${esc(p.error || "cause inconnue")}. « Relancer » ne republie que les réseaux manquants.</p>` : "";
     const vis = p.features && p.features.visual; const lphotos = (p.listing && p.listing.photos) || [];
     const chosen = vis && vis.data ? [vis.data.photo_main, vis.data.photo_1, vis.data.photo_2, vis.data.photo_3].filter(Boolean) : [];
     const photoPicker = vis && vis.renders && lphotos.length ? `<details class="photos" ${vis.status === "rendering" ? "open" : ""}>
@@ -71,7 +72,7 @@
         <div class="actions"><button type="button" class="gold act" data-action="rerender">Refaire le visuel</button><button type="button" class="ghost act" data-action="photos-reset">Tout désélectionner</button></div>
       </details>` : "";
     const mainBtn = scheduled ? `<button class="gold act" data-action="approve">Publier maintenant</button>`
-      : p.status === "error" ? `<button class="gold act" data-action="approve">Relancer la publication</button>`
+      : p.status === "error" || p.status === "partial" ? `<button class="gold act" data-action="approve">Relancer la publication</button>`
       : `<button class="gold act" data-action="approve">Valider et publier</button>`;
     return `<article class="card post" id="post-${p.id}" data-id="${p.id}" data-status="${esc(p.status)}">
       <div class="head"><div><span class="tag ${esc(brand.slug)}">${esc(brand.name || "")}</span> <span class="meta">${esc(p.slot)} · ${esc(p.type)} · ${fmtDate(p.created_at)}</span></div>
@@ -125,7 +126,7 @@
     if (action === "schedule-close") { $(".sched-form", card).hidden = true; return; }
     const texts = {}; $$("textarea[data-field]", card).forEach((ta) => { if (ta.dataset.field === "hashtags") texts.hashtags = ta.value.split(/\s+/).filter(Boolean); else texts[ta.dataset.field] = ta.value; });
     let body = { id, action, ...texts };
-    if (action === "approve" && !confirm(card.dataset.status === "error" ? "Relancer la publication de ce post ?" : "Publier ce post maintenant ? Il partira sur les réseaux de la marque.")) return;
+    if (action === "approve" && !confirm(card.dataset.status === "error" || card.dataset.status === "partial" ? "Relancer la publication de ce post ?" : "Publier ce post maintenant ? Il partira sur les réseaux de la marque.")) return;
     if (action === "schedule") {
       const v = $("[data-sched]", card).value; if (!v) { status.textContent = "Choisissez une date et une heure."; return; }
       const when = new Date(v); if (when.getTime() < Date.now() + 60 * 1000) { status.textContent = "Cette heure est déjà passée."; return; }

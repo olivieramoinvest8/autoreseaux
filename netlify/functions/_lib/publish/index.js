@@ -29,12 +29,12 @@ async function trigger(id, baseUrl) {
 /**
  * Valide un post. Sans scheduledAt : publication immédiate (publish-background). Avec scheduledAt dans le
  * futur : le post attend en statut approved, publish-scheduled le publiera à l'heure dite.
- * Accepté depuis draft (validation), error (relance) et approved (changement d'heure ou « publier maintenant »).
+ * Accepté depuis draft (validation), error et partial (relance des réseaux restants) et approved (changement d'heure ou « publier maintenant »).
  */
 async function approvePost(id, { via, baseUrl, scheduledAt }) {
   const post = await loadPost(id);
   if (!post) return { ok: false, error: "Post introuvable" };
-  if (!["draft", "error", "approved"].includes(post.status)) return { ok: false, error: `Ce post est déjà « ${post.status} »`, postId: id };
+  if (!["draft", "error", "partial", "approved"].includes(post.status)) return { ok: false, error: `Ce post est déjà « ${post.status} »`, postId: id };
   const when = scheduledAt ? new Date(scheduledAt) : null;
   if (when && Number.isNaN(when.getTime())) return { ok: false, error: "Date de programmation invalide", postId: id };
   const future = when && when.getTime() > Date.now() + 60 * 1000;
@@ -45,7 +45,7 @@ async function approvePost(id, { via, baseUrl, scheduledAt }) {
     await logEvent("dashboard", "info", `Post programmé (${via}) pour ${when.toISOString()}`, { scheduled_at: when.toISOString() }, id);
     return { ok: true, postId: id, scheduled_at: when.toISOString() };
   }
-  await logEvent("dashboard", "info", `Post validé (${via})${post.status === "error" ? ", relance" : ""}`, null, id);
+  await logEvent("dashboard", "info", `Post validé (${via})${post.status === "error" || post.status === "partial" ? ", relance" : ""}`, null, id);
   await trigger(id, baseUrl);
   return { ok: true, postId: id };
 }

@@ -11,7 +11,7 @@ exports.handler = async (event) => {
   if (denied) return denied;
   const status = (event.queryStringParameters || {}).status || "draft";
   let q = supabase().from("posts").select("*, brand:brands(slug, name, networks), listing:listings(id, title, url, photos)").order("created_at", { ascending: false });
-  if (status === "draft") q = q.or("status.eq.draft,status.eq.error,and(status.eq.approved,scheduled_at.not.is.null)");
+  if (status === "draft") q = q.or("status.eq.draft,status.eq.error,status.eq.partial,and(status.eq.approved,scheduled_at.not.is.null)");
   else q = q.in("status", ["approved", "published", "partial", "rejected", "error"]).limit(60);
   const { data, error } = await q;
   if (error) return json(500, { error: error.message });

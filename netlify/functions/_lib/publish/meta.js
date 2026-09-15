@@ -88,7 +88,7 @@ async function waitContainer(creationId) {
   for (let i = 0; i < 40; i++) {
     const s = await graph(`/${creationId}`, { fields: "status_code,status" }, "GET");
     if (s.status_code === "FINISHED") return;
-    if (s.status_code === "ERROR") throw new Error(`Instagram : conteneur en erreur (${JSON.stringify(s.status)})`);
+    if (s.status_code === "ERROR" || s.status_code === "EXPIRED") throw new Error(`Instagram : conteneur ${s.status_code} (${JSON.stringify(s.status)})`);
     await new Promise((r) => setTimeout(r, 5000));
   }
   throw new Error("Instagram : le conteneur n'est pas prêt après 200 s");
@@ -104,11 +104,16 @@ async function publishInstagram(post) {
     await waitContainer(creation.id);
   } else {
     creation = await graph(`/${igId}/media`, { image_url: post.media_url, caption });
-    // L'image doit être un JPEG public ; on lit l'état du conteneur pour une erreur lisible plutôt que « Media ID is not available ».
-    const s = await graph(`/${creation.id}`, { fields: "status_code,status" }, "GET").catch(() => null);
-    if (s && s.status_code === "ERROR") throw new Error(`Instagram : conteneur en erreur (${JSON.stringify(s.status)})`);
+    // Instagram télécharge l'image (JPEG public) en arrière-plan : publier avant la fin donne « Media ID is not available ».
+    await waitContainer(creation.id);
   }
-  const pub = await graph(`/${igId}/media_publish`, { creation_id: creation.id });
+  // Même FINISHED, Meta refuse parfois la publication pendant quelques secondes : on réessaie trois fois.
+  let pub, lastErr;
+  for (let i = 0; i < 4; i++) {
+    try { pub = await graph(`/${igId}/media_publish`, { creation_id: creation.id }); break; }
+    catch (e) { lastErr = e; if (!/Media ID is not available/i.test(e.message)) throw e; await new Promise((r) => setTimeout(r, 8000)); }
+  }
+  if (!pub) throw new Error(`Instagram : ${lastErr.message} (image ${post.media_url})`);
   return { id: pub.id, kind: isVideo(post) ? "reel" : "image" };
 }
 
