@@ -69,3 +69,9 @@ th { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(-
 .strip .ph b { position: absolute; left: 4px; top: 4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: #2E358D; color: #fff; font: 700 13px/22px Inter, Arial, sans-serif; text-align: center; }
 
 pre.hint { white-space: pre-wrap; word-break: break-word; background: #F4F5FA; border: 1px solid #D6D9E8; padding: 10px; border-radius: 6px; font-size: 12px; }
+
+/* Dépôt d'un match : une ligne par clip */
+.clip-row { display: grid; grid-template-columns: minmax(0, 1.4fr) 1.2fr 1fr 1.2fr; gap: 8px; align-items: center; margin: 6px 0; }
+.clip-row .name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-row select, .clip-row input { margin: 0; }
+@media (max-width: 600px) { .clip-row { grid-template-columns: 1fr 1fr; } .clip-row .name { grid-column: 1 / -1; } }

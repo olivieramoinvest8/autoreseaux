@@ -145,25 +145,42 @@
   $("#reload-posts").addEventListener("click", loadPosts);
 
   // ---------- Déposer ----------
-  $("#kind").addEventListener("change", (e) => ($("#match-fields").hidden = e.target.value !== "match"));
+  // Même liste que brands/basket/clips.json (le serveur refuse une catégorie absente de ce fichier).
+  const CLIP_CATEGORIES = [["2pts", "Panier 2 pts"], ["3pts", "Panier 3 pts"], ["lancer-franc", "Lancer franc"], ["layup", "Pénétration / layup"], ["passe", "Passe décisive"], ["rebond", "Rebond"], ["contre", "Contre"], ["interception", "Interception"], ["defense", "Action défensive"], ["ambiance", "Ambiance / banc"], ["arbitrage", "Arbitrage (privé)"]];
+  const CLIP_WHO = [["fils", "Mon fils"], ["equipe", "L'équipe"]];
+  function renderClipRows() {
+    const isMatch = $("#kind").value === "match"; const files = Array.from($("#inbox-form").files.files || []);
+    $("#clip-rows").hidden = !(isMatch && files.length);
+    if (!isMatch) return;
+    const opts = (list, sel) => list.map(([v, l]) => `<option value="${v}"${v === sel ? " selected" : ""}>${l}</option>`).join("");
+    $("#clip-list").innerHTML = files.map((f, i) => `<div class="clip-row" data-i="${i}">
+        <span class="name" title="${esc(f.name)}">${esc(f.name)}</span>
+        <select data-clip="category">${opts(CLIP_CATEGORIES, i === 0 ? "" : $$(".clip-row select[data-clip=category]")[i - 1] ? $$(".clip-row select[data-clip=category]")[i - 1].value : "")}</select>
+        <select data-clip="who">${opts(CLIP_WHO, "fils")}</select>
+        <input data-clip="note" maxlength="120" placeholder="note (facultatif)">
+      </div>`).join("");
+  }
+  function clipMeta() { return $$(".clip-row").map((r) => ({ category: $("[data-clip=category]", r).value, who: $("[data-clip=who]", r).value, note: $("[data-clip=note]", r).value })); }
+  $("#kind").addEventListener("change", (e) => { $("#match-fields").hidden = e.target.value !== "match"; if (e.target.value === "match") $("#inbox-form").brand.value = "basket"; renderClipRows(); });
+  $("#inbox-form").files.addEventListener("change", renderClipRows);
   $("#inbox-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target; const fd = new FormData(f); const files = Array.from(f.files.files || []);
     const st = $("#inbox-status"); $("#inbox-submit").disabled = true; st.textContent = "Envoi…";
     const data = fd.get("kind") === "match" ? { date: fd.get("date") || null, opponent: fd.get("opponent") || null, score_home: fd.get("score_home") ? Number(fd.get("score_home")) : null, score_away: fd.get("score_away") ? Number(fd.get("score_away")) : null, home: fd.get("home") === "on" } : {};
     try {
-      const r = await api("api-inbox", { method: "POST", body: JSON.stringify({ brand: fd.get("brand"), kind: fd.get("kind"), title: fd.get("title"), body: fd.get("body"), data, files: files.map((x) => ({ name: x.name, type: x.type, size: x.size })) }) });
+      const r = await api("api-inbox", { method: "POST", body: JSON.stringify({ brand: fd.get("brand"), kind: fd.get("kind"), title: fd.get("title"), body: fd.get("body"), data, files: files.map((x) => ({ name: x.name, type: x.type, size: x.size })), clips: fd.get("kind") === "match" ? clipMeta() : undefined }) });
       for (let i = 0; i < files.length; i++) {
         st.textContent = `Fichier ${i + 1} / ${files.length}…`;
         if (!DEMO) { const up = await fetch(r.uploads[i].url, { method: "PUT", headers: { "Content-Type": files[i].type || "application/octet-stream" }, body: files[i] }); if (!up.ok) throw new Error(`fichier ${files[i].name} non envoyé (${up.status})`); }
       }
-      st.textContent = "Déposé. Le robot s'en servira au prochain créneau."; f.reset(); $("#match-fields").hidden = true; loadInbox();
+      st.textContent = "Déposé. Le robot s'en servira au prochain créneau."; f.reset(); $("#match-fields").hidden = true; $("#clip-rows").hidden = true; loadInbox();
     } catch (err) { st.textContent = "Erreur : " + err.message; }
     $("#inbox-submit").disabled = false;
   });
   async function loadInbox() {
     const box = $("#inbox-list");
-    try { const { inbox } = await api("api-inbox"); box.innerHTML = inbox.length ? `<div class="tablewrap"><table><tr><th>Date</th><th>Marque</th><th>Type</th><th>Titre</th><th>Fichiers</th><th>État</th></tr>${inbox.map((i) => `<tr><td>${fmtDate(i.created_at)}</td><td>${esc(i.brand && i.brand.name)}</td><td>${esc(i.kind)}</td><td>${esc(i.title)}</td><td>${(i.files || []).length}</td><td>${esc(i.status)}</td></tr>`).join("")}</table></div>` : '<p class="empty">Aucun dépôt pour l\'instant.</p>'; }
+    try { const { inbox } = await api("api-inbox"); box.innerHTML = inbox.length ? `<div class="tablewrap"><table><tr><th>Date</th><th>Marque</th><th>Type</th><th>Titre</th><th>Fichiers</th><th>État</th></tr>${inbox.map((i) => `<tr><td>${fmtDate(i.created_at)}</td><td>${esc(i.brand && i.brand.name)}</td><td>${esc(i.kind)}</td><td>${esc(i.title)}</td><td>${(i.files || []).length}${i.kind === "match" && i.data && i.data.clips ? " · " + esc(i.data.clips.map((c) => c.category).join(", ")) : ""}</td><td>${esc(i.status)}</td></tr>`).join("")}</table></div>` : '<p class="empty">Aucun dépôt pour l\'instant.</p>'; }
     catch (e) { if (e.message !== "401") box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
   }
 

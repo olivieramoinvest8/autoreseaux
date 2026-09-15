@@ -30,6 +30,9 @@ Connecteurs disponibles dans l'environnement : GitHub, Supabase, Netlify, Gmail,
 
 Réseau de l'environnement : vérifié le 8 sept. (session 2), `curl -I https://www.amoinvest.fr` répond 200 ; Supabase et Netlify passent. **Bloqués** : `amoinvest.staticlbi.com` (photos des biens) et `*.cloudfront.net` (rendus Higgsfield). À ajouter à la liste blanche ; en attendant, `render/fetch-media.js` passe par la fonction Supabase `fetch-image`.
 
+- **Meta publie (15 sept.)** : Facebook + Instagram OK depuis le tableau de bord. Conditions : application Meta « En ligne », jeton de l'utilisateur système socialbot, page AMO Invest 281371232545898, Instagram amo_invest. Bouton « Vérifier la connexion Meta » dans Historique.
+- **Basket** : dépôt d'un match avec catégorie par clip (onglet Déposer). Table `social.clips` = base de montage (migration `supabase/migrations/2026-09-15-clips.sql`). Montage et proposition vidéo : à faire (étape 2).
+
 ## 3. Décisions prises (ne pas rouvrir sans Olivier)
 - Trois marques : AMO Invest (Facebook + Instagram), chaîne tech/IA (YouTube + TikTok, nom à choisir), basket (TikTok au nom d'Olivier, fils de 14 ans, prénom seul).
 - Publication hybride gratuite : API Meta, API YouTube, brouillon TikTok dans l'appli. Pas de Postiz, pas de n8n.

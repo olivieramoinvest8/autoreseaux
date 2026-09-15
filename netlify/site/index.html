@@ -50,6 +50,10 @@
         <label class="row"><input type="checkbox" name="home" checked> Match à domicile</label>
       </div>
       <label>Fichiers (photos, clips, audio) <input type="file" name="files" multiple></label>
+      <div id="clip-rows" hidden>
+        <p class="hint">Pour chaque clip : l'action et qui est à l'image. « Arbitrage » reste privé, jamais publié. Une note courte est facultative (ex. « buzzer », « 4e quart »).</p>
+        <div id="clip-list"></div>
+      </div>
       <div class="actions"><button type="submit" id="inbox-submit">Déposer</button><span id="inbox-status" class="status"></span></div>
     </form>
     <h2>Derniers dépôts</h2>

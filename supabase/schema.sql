@@ -122,6 +122,27 @@ create table if not exists social.matches (
   created_at timestamptz not null default now()
 );
 
+
+-- 5b. Clips de basket (base de montage, voir supabase/migrations/2026-09-15-clips.sql)
+create table if not exists social.clips (
+  id         uuid primary key default gen_random_uuid(),
+  match_id   uuid references social.matches (id),
+  inbox_id   uuid references social.inbox (id),
+  path       text not null,                               -- chemin dans le bucket raw
+  category   text not null,                               -- id de brands/basket/clips.json
+  phase      text,                                        -- attaque | defense | mixte | hors-jeu
+  who        text not null default 'fils'                 -- fils | equipe
+             check (who in ('fils', 'equipe')),
+  note       text,
+  publiable  boolean not null default true,               -- false : gardé pour Olivier et le coach, jamais monté
+  duration_s numeric,                                     -- rempli au montage
+  used_in    uuid[] not null default '{}',                -- posts où le clip a été monté
+  created_at timestamptz not null default now()
+);
+create index if not exists clips_match_idx    on social.clips (match_id);
+create index if not exists clips_category_idx on social.clips (category, who);
+alter table social.clips enable row level security;
+
 -- 6. Mesures et apprentissage ---------------------------------------------------------
 create table if not exists social.metrics (
   id            uuid primary key default gen_random_uuid(),

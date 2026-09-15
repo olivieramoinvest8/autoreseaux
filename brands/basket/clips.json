@@ -1,0 +1,20 @@
+{
+  "_doc": "Catégories des clips de basket. Même liste dans le tableau de bord (netlify/site/app.js, CLIP_CATEGORIES) : si l'on change ici, changer là aussi. publiable=false : gardé en base pour Olivier et le coach, jamais monté dans une vidéo publiée.",
+  "categories": [
+    { "id": "2pts",         "label": "Panier 2 pts",        "phase": "attaque", "publiable": true },
+    { "id": "3pts",         "label": "Panier 3 pts",        "phase": "attaque", "publiable": true },
+    { "id": "lancer-franc", "label": "Lancer franc",        "phase": "attaque", "publiable": true },
+    { "id": "layup",        "label": "Pénétration / layup", "phase": "attaque", "publiable": true },
+    { "id": "passe",        "label": "Passe décisive",      "phase": "attaque", "publiable": true },
+    { "id": "rebond",       "label": "Rebond",              "phase": "mixte",   "publiable": true },
+    { "id": "contre",       "label": "Contre",              "phase": "defense", "publiable": true },
+    { "id": "interception", "label": "Interception",        "phase": "defense", "publiable": true },
+    { "id": "defense",      "label": "Action défensive",    "phase": "defense", "publiable": true },
+    { "id": "ambiance",     "label": "Ambiance / banc",     "phase": "hors-jeu", "publiable": true },
+    { "id": "arbitrage",    "label": "Arbitrage (privé)",   "phase": "hors-jeu", "publiable": false }
+  ],
+  "qui": [
+    { "id": "fils",   "label": "Mon fils" },
+    { "id": "equipe", "label": "L'équipe" }
+  ]
+}
