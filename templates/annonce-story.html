@@ -16,6 +16,8 @@
     fees                  mention obligatoire des honoraires, telle qu'affichée sur le site
     spec_1 … spec_4       caractéristiques courtes ("6 pièces", "4 chambres", "170 m² Carrez", "3 parkings")
     dpe, ges              classes A à G — jamais inventées ; si absentes, les pastilles n'apparaissent pas
+ *   dpe_note              texte à la place des pastilles quand aucune lettre n'est lisible : « en cours » (maison,
+ *                         appartement) ou « non soumis » (terrain). Ne pas donner dpe et dpe_note à la fois.
     ref                   référence de l'annonce ("Réf. 458")
     site                  "amoinvest.fr"
 -->
@@ -78,6 +80,7 @@
   .energy .lab { font-family: "Oswald", sans-serif; font-size: 20px; letter-spacing: .14em; color: rgba(255,255,255,.75); }
   .energy .let { width: 74px; height: 74px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
     font-family: "Oswald", sans-serif; font-weight: 700; font-size: 44px; color: #1A1A1A; background: #CCCCCC; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  .let.note { width: auto; padding: 0 16px; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; background: rgba(255,255,255,.16); color: #fff; border: 2px solid rgba(255,255,255,.55); }
   /* Couleurs de l'étiquette énergie (DPE) et climat (GES) */
   .let.dpe-A { background: #00A06D; color: #fff; } .let.dpe-B { background: #52B153; color: #fff; } .let.dpe-C { background: #A5CE4D; }
   .let.dpe-D { background: #F4E70F; } .let.dpe-E { background: #F0B50F; } .let.dpe-F { background: #EB8235; color: #fff; } .let.dpe-G { background: #D7221F; color: #fff; }
@@ -119,6 +122,7 @@
         <div class="energy">
           <div class="tag" data-if="dpe"><span class="lab">DPE</span><span class="let dpe-{{dpe}}">{{dpe}}</span></div>
           <div class="tag" data-if="ges"><span class="lab">GES</span><span class="let ges-{{ges}}">{{ges}}</span></div>
+          <div class="tag" data-if="dpe_note"><span class="lab">DPE</span><span class="let note">{{dpe_note}}</span></div>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@
     kicker            "En résumé · Réf. 447"
     title             titre court (majuscules automatiques)
     row1_label, row1_value … row6_label, row6_value   lignes du récapitulatif (facultatives)
-    dpe, ges          classes A à G, jamais inventées
+    dpe, ges          classes A à G, jamais inventées ; dpe_note = « en cours » ou « non soumis » quand aucune lettre
     cta               "Parlons-en"
     site              "amoinvest.fr"
     note              mention en petit (honoraires, source des chiffres)
@@ -46,6 +46,7 @@
   .energy .tag { display: flex; align-items: center; gap: 12px; }
   .energy .lab { font-family: "Oswald", sans-serif; font-size: 24px; letter-spacing: .14em; color: rgba(255,255,255,.8); }
   .energy .let { width: 70px; height: 70px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: "Oswald", sans-serif; font-weight: 700; font-size: 42px; color: #1A1A1A; background: #CCC; box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+  .let.note { width: auto; padding: 0 16px; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; background: rgba(255,255,255,.16); color: #fff; border: 2px solid rgba(255,255,255,.55); }
   .let.dpe-A { background: #00A06D; color: #fff; } .let.dpe-B { background: #52B153; color: #fff; } .let.dpe-C { background: #A5CE4D; }
   .let.dpe-D { background: #F4E70F; } .let.dpe-E { background: #F0B50F; } .let.dpe-F { background: #EB8235; color: #fff; } .let.dpe-G { background: #D7221F; color: #fff; }
   .let.ges-A { background: #EDE5F6; } .let.ges-B { background: #D2C0EA; } .let.ges-C { background: #B49BDD; } .let.ges-D { background: #9676CE; color: #fff; }
@@ -78,6 +79,7 @@
     <div class="energy">
       <div class="tag" data-if="dpe"><span class="lab">DPE</span><span class="let dpe-{{dpe}}">{{dpe}}</span></div>
       <div class="tag" data-if="ges"><span class="lab">GES</span><span class="let ges-{{ges}}">{{ges}}</span></div>
+      <div class="tag" data-if="dpe_note"><span class="lab">DPE</span><span class="let note">{{dpe_note}}</span></div>
     </div>
     <div class="bottom">
       <div class="cta" data-if="cta">{{cta}} →</div>

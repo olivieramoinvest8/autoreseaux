@@ -1,4 +1,4 @@
-# Routine `amo-image` — un post image AMO Invest, du lundi au samedi à 11h03
+# Routine `amo-image` — un post image AMO Invest, du lundi au samedi à 11h03 et 18h03
 
 Ce fichier est la référence de la routine Claude Code (cloud) qui prépare le post image du matin. La routine
 est créée dans claude.ai (Code → Routines) avec le texte de la section 3 ; ce document en garde la copie.
@@ -21,11 +21,11 @@ est créée dans claude.ai (Code → Routines) avec le texte de la section 3 ; c
 | Environnement | `com` |
 | Nouvelle session à chaque exécution | oui |
 | Connecteurs | aucun à la création (le 16 sept., l'outil de création n'a pas pu les attacher) : à ajouter dans claude.ai → Code → Routines → amo-image → Modifier → Connecteurs (Gmail, Higgsfield). Sans Gmail, la routine met le texte du mail dans son résumé, et la notification de fin de routine (mail + notification) le transmet. |
-| Horaire | `3 9 * * 1-6` (UTC) = 11h03 Paris en heure d'été ; passer à `3 10 * * 1-6` après le 25 octobre 2026 |
+| Horaire | `3 9,16 * * 1-6` (UTC) = 11h03 et 18h03 Paris en heure d'été ; passer à `3 10,17 * * 1-6` après le 25 octobre 2026 |
 | Notifications | mail + notification à Olivier à chaque fin de routine |
 | Identifiant | `trig_019KURjR1hBJ3hcwdSviAWBx`, créée le 16 septembre 2026, première exécution planifiée le 16 sept. à 11h03 |
 
-## 3. Texte de la routine (tel qu'enregistré le 16 septembre 2026)
+## 3. Texte de la routine (mis à jour le 16 septembre 2026, 11h)
 
 ```
 Tu es la routine amo-image du projet amo-social-bot (dépôt olivieramoinvest8/autoreseaux, déjà cloné dans le dossier de
@@ -42,9 +42,13 @@ tu n'écris jamais la valeur d'une variable d'environnement ni d'une clé dans t
 4. Mémoire courte : node scripts/bot-recent.js --brand amo-invest. Tu y trouves les 30 derniers posts (ne jamais refaire
    un thème à moins de 14 jours ; alterner les formats selon content/calendar.json), les annonces nouvelles ou modifiées
    depuis 14 jours, et les dépôts d'Olivier non utilisés.
-5. Choisis le sujet, par priorité : un dépôt d'Olivier (inbox) > une annonce nouvelle ou modifiée (post « annonce » avec
-   prix, honoraires, DPE, GES, lien vers la fiche, photos du bien uniquement, jamais de DPE ou GES inventé : sans valeur
-   lisible, choisis un autre sujet) > une création sur le segment du jour de la semaine (content/calendar.json).
+5. Choisis le sujet, par priorité : un dépôt d'Olivier (inbox) > un bien nouveau (vente ou location) > un bien passé sous
+   offre, vendu ou loué (fierté sobre, invitation à confier son bien, jamais le prix final s'il n'est pas public) > une
+   nouveauté légale ou fiscale vérifiée > les autres idées sur le segment du jour (content/calendar.json). Sur une
+   annonce : prix, honoraires, DPE, GES, lien vers la fiche, photos du bien uniquement. DPE et GES : seulement les
+   lettres lues sur la fiche ; sans lettre, donne dpe_note « en cours » (maison, appartement) ou « non soumis »
+   (terrain) au lieu d'écarter le bien. La routine tourne à 11h03 et 18h03 : le post du soir ne reprend ni le sujet ni
+   le format du post du matin (voir la mémoire courte).
 6. Fabrique le visuel avec les templates du dépôt (render/render-image.js ou render/render-carousel.js, sortie JPEG), les
    photos via render/fetch-media.js. Higgsfield (s'il est disponible) seulement pour un fond de post pédagogique, avec
    parcimonie ; sinon, compose sans image générée. Écris text_fb, text_ig, hashtags et features selon la charte

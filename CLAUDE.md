@@ -15,7 +15,7 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 
 ## 2. Ce que fait ce dépôt
 
-- AMO : 11h03 (lun-sam) un post image ; 18h03 (lun-sam) une vidéo verticale de 45 à 60 s.
+- AMO : 11h03 et 18h03 (lun-sam) un post image par la routine `amo-image` ; la vidéo verticale de 45 à 60 s remplacera le créneau de 18h03 quand la phase vidéo sera prête.
 - Tech : lun, mer, ven, une vidéo longue de 4 à 6 min et 3 à 5 extraits verticaux complets en eux-mêmes (jamais de « partie 1/10 »).
 - Basket : montage d'un match dès qu'Olivier en dépose un.
 - Chaque post est validé par Olivier dans le tableau de bord privé (mail « un post est prêt » + lien).
@@ -58,7 +58,7 @@ Stack déjà chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, H
 - Un appel à l'action sobre (« Parlons-en », « Écrivez-nous », « Estimation sur rendez-vous »).
 - Rotation des segments sur la semaine (voir `content/calendar.json`).
 - Jamais deux fois le même thème en 14 jours : relire les 30 derniers `posts` en base avant de choisir.
-- Sur un visuel d'annonce (vente/location) : DPE et GES lisibles, mention des honoraires. Ne jamais inventer ces valeurs.
+- Sur un visuel d'annonce (vente/location) : DPE et GES lisibles, mention des honoraires. Ne jamais inventer ces valeurs. Sans lettre lisible sur la fiche : « DPE en cours » (maison, appartement) ; terrain : « non soumis au DPE ». Un bien sans DPE n'est donc plus écarté.
 
 ### Formats par réseau
 | Réseau | Contrainte |
@@ -84,7 +84,7 @@ Stack déjà chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, H
 
 1. Lire la charte de la marque, `calendar.json`, les 30 derniers `posts` de la marque et la table `inbox`.
 2. AMO : lire les pages vente et location du site, mettre à jour `listings`, noter les changements.
-3. Sujet par priorité : dépôt d'Olivier > changement d'annonce > création (ancien bien, loi vérifiée, chiffre sourcé, vie de l'agence).
+3. Sujet par priorité : dépôt d'Olivier > bien nouveau (vente ou location) > bien passé sous offre, vendu ou loué > nouveauté légale ou fiscale vérifiée > autres idées (ancien bien, chiffre sourcé, vie de l'agence, segment du jour).
 4. Skill `amo-social-strategist` : angle et textes par réseau. Lien vers la fiche du site sur toute annonce.
 5. Skill `amo-visual-designer` : template HTML → PNG ; ou `scenario.json` + script → GitHub Actions.
 6. Uploader l'asset dans le bucket Supabase, insérer dans `posts` avec `status = 'draft'`.

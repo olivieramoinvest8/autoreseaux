@@ -3,8 +3,8 @@ Référence complète : `CLAUDE.md` §4 (règles de contenu) et §5 (charte grap
 
 - Réseaux : Facebook (page) + Instagram (professionnel). Image à 11h03, vidéo à 18h03, du lundi au samedi.
 - Calendrier : `content/calendar.json`. Segments en rotation : vendeurs, investisseurs, acheteurs, bailleurs.
-- Priorité du sujet : dépôt d'Olivier > changement d'annonce (`listings`) > création.
-- Annonce : prix, honoraires, DPE, GES, lien vers la fiche amoinvest.fr obligatoires. Photos du bien uniquement.
+- Priorité du sujet : dépôt d'Olivier > bien nouveau (vente ou location) > bien sous offre, vendu ou loué (fierté sobre, invitation à confier son bien, jamais le prix final s'il n'est pas public) > nouveauté légale ou fiscale vérifiée > autres idées (segment du jour).
+- Annonce : prix, honoraires, DPE, GES, lien vers la fiche amoinvest.fr obligatoires. Photos du bien uniquement. Sans lettre DPE lisible : « en cours » (maison, appartement) ou « non soumis » (terrain), via la clé `dpe_note` des templates.
 - Signature : « AMO Invest · Graveson », appel à l'action sobre. Vouvoiement.
 - Enseignements : `learnings.md` (lu avant chaque création, mis à jour par la routine analytics).
 
