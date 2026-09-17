@@ -96,6 +96,6 @@ carte `annonce-story.html` (prix, DPE/GES, honoraires, logo) ou `post-story.html
 Sortie : H.264, piste audio silencieuse, « faststart » ; 4 photos + carte = 17,6 s, 5 Mo, 30 s de calcul. Pas de musique
 dans le fichier (Olivier l'ajoute dans l'application s'il le souhaite). Dépôt : `scripts/publish-to-supabase.js --asset x.mp4
 --thumb x.jpg` (bucket `videos`, 25 Mo maximum par le guichet bot-draft). Le tableau de bord lit la vidéo ; Meta la
-publie en reel Instagram et en vidéo Facebook. Pas de refabrication depuis le tableau de bord pour la vidéo (v1).
+publie en reel Instagram et en vidéo Facebook. Formats : `portrait` 1080×1920 (reel, story ; par défaut), `landscape` 1920×1080 (Facebook, YouTube ; carte de fin `annonce-wide.html`), `feed` 1080×1350. Ajustement `fit` : `blur` par défaut (photo entière, vide comblé par un fond flou de la même photo, jamais de noir ni de recadrage aux deux tiers), `cover` sur demande. Une carte au mauvais format est posée entière sur fond bleu marine. Pas de refabrication depuis le tableau de bord pour la vidéo (v1).
 Premier essai réel : post `d62cd7b0-a720-4ef1-bf0f-4190ce1b0ebd` (duplex 458), déposé le 17 sept.
 
