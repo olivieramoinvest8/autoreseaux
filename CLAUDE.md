@@ -15,7 +15,7 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 
 ## 2. Ce que fait ce dépôt
 
-- AMO : chaque matin à 8h03 (lun-sam), la routine `amo-image` dépose **trois propositions** de post image : un bien à vendre (ou vendu, sous offre) en carrousel avec le lien de la fiche, un bien à louer, une actualité (loi, conseil, saison, vie de l'agence). Olivier en garde zéro à trois et programme lui-même les heures (11h03 et 18h03 proposées par défaut). Message toujours positif. La vidéo verticale de 45 à 60 s viendra avec la phase vidéo.
+- AMO : chaque matin à 8h03 (lun-sam), la routine `amo-image` dépose **trois propositions** : un bien à vendre (ou vendu, sous offre) en carrousel avec le lien de la fiche, un bien à louer, une actualité (loi, conseil, saison, vie de l'agence) ; l'une des trois est une vidéo verticale « photos animées » (`render/render-video.js`), à tour de rôle. Olivier en garde zéro à trois et programme lui-même les heures (11h03 et 18h03 proposées par défaut). Message toujours positif. La vidéo verticale de 45 à 60 s viendra avec la phase vidéo.
 - Tech : lun, mer, ven, une vidéo longue de 4 à 6 min et 3 à 5 extraits verticaux complets en eux-mêmes (jamais de « partie 1/10 »).
 - Basket : montage d'un match dès qu'Olivier en dépose un.
 - Chaque post est validé par Olivier dans le tableau de bord privé (mail « un post est prêt » + lien).
@@ -103,6 +103,7 @@ npm run test:functions          # vérifie la syntaxe des fonctions Netlify
 npm run test:listings           # auto-test du lecteur d'annonces amoinvest.fr
 node netlify/functions/_lib/listings.js --dry-run   # lit vraiment le site, n'écrit rien
 node scripts/publish-to-supabase.js --brand amo-invest --asset output/post.png --post content/runs/<date>.json
+node render/render-video.js --data content/examples/video-annonce.json --out output/video.mp4 --thumb output/video.jpg   # vidéo photos animées
 ```
 
 Règle de travail avec Olivier : **rien n'est poussé sur GitHub sans son accord explicite** (« on pousse »), car Netlify construit le site à chaque push. On commite en local, on pousse sur son signal.

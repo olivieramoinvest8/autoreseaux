@@ -85,3 +85,17 @@ Règles apprises sur les vraies photos du site :
 - DPE et GES ne sont posés que s'ils sont lus sur la fiche (bulle active) ; sinon les pastilles disparaissent d'elles-mêmes (`data-if`).
 
 Relais d'images : l'environnement Claude Code n'atteint que amoinvest.fr, Supabase et Netlify. La fonction Supabase `fetch-image` (projet Communication, lecture seule, hôtes limités à staticlbi.com, cloudfront.net, upload.higgsfield.ai et amoinvest.fr) sert de relais ; `render/fetch-media.js` l'appelle avec la clé publique du projet lue dans `.env` (voir `.env.example`). Le jour où `*.staticlbi.com` et `*.cloudfront.net` sont ajoutés à la liste blanche de l'environnement, le direct suffit et le relais n'est plus appelé.
+
+## 8. Vidéo « photos animées » (17 sept.)
+
+`render/render-video.js` fabrique une vidéo verticale 1080×1920 (reel Instagram, vidéo Facebook, story) sans Remotion ni
+GitHub Actions : ffmpeg (paquet npm `ffmpeg-static`, binaire téléchargé à `npm install`) anime chaque photo (zoom avant,
+zoom arrière, panoramique droite, panoramique gauche, en alternance), enchaîne les plans en fondu et pose en fin la
+carte `annonce-story.html` (prix, DPE/GES, honoraires, logo) ou `post-story.html` (actualité). Exemple :
+`content/examples/video-annonce.json` ; lancer `node render/render-video.js --data … --out output/x.mp4 --thumb output/x.jpg`.
+Sortie : H.264, piste audio silencieuse, « faststart » ; 4 photos + carte = 17,6 s, 5 Mo, 30 s de calcul. Pas de musique
+dans le fichier (Olivier l'ajoute dans l'application s'il le souhaite). Dépôt : `scripts/publish-to-supabase.js --asset x.mp4
+--thumb x.jpg` (bucket `videos`, 25 Mo maximum par le guichet bot-draft). Le tableau de bord lit la vidéo ; Meta la
+publie en reel Instagram et en vidéo Facebook. Pas de refabrication depuis le tableau de bord pour la vidéo (v1).
+Premier essai réel : post `d62cd7b0-a720-4ef1-bf0f-4190ce1b0ebd` (duplex 458), déposé le 17 sept.
+

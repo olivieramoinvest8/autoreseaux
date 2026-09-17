@@ -1,0 +1,17 @@
+{
+  "_doc": "Exemple pour render/render-video.js : vidéo verticale « photos animées » d'une annonce (réf. 458). Les photos sont rapatriées d'abord avec render/fetch-media.js dans output/assets/<ref>/. Lancer : node render/render-video.js --data content/examples/video-annonce.json --out output/video-458.mp4 --thumb output/video-458.jpg",
+  "photos": ["output/assets/458/photo-4.jpg", "output/assets/458/photo-1.jpg", "output/assets/458/photo-3.jpg", "output/assets/458/photo-7.jpg"],
+  "seconds_per_photo": 4,
+  "transition": 0.6,
+  "fps": 30,
+  "outro": {
+    "template": "templates/annonce-story.html",
+    "seconds": 4,
+    "data": {
+      "badge": "Exclusivité", "kicker": "À vendre · Graveson", "title": "Duplex 224 m² avec jardin privatif",
+      "price": "339 000 €", "fees": "Honoraires TTC inclus", "spec_1": "6 pièces", "spec_2": "4 chambres", "spec_3": "170 m² Carrez", "spec_4": "3 parkings",
+      "dpe": "B", "ges": "A", "ref": "Réf. 458", "site": "amoinvest.fr",
+      "photo_main": "output/assets/458/photo-4.jpg", "photo_1": "output/assets/458/photo-1.jpg", "photo_2": "output/assets/458/photo-3.jpg", "photo_3": "output/assets/458/photo-7.jpg"
+    }
+  }
+}

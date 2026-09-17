@@ -21,6 +21,7 @@ La routine `amo-image` (8h03, lun-sam) dépose trois brouillons distincts ; Oliv
 - **Location** : un bien à louer, mêmes priorités. Format différent de celui de la proposition Vente (affiche feed + story, ou carrousel).
 - **Actualité** : nouveauté légale ou fiscale vérifiée, conseil, saison, vie de l'agence, sur le segment du jour. Visuel travaillé et réaliste (image générée Higgsfield quand le connecteur est disponible : scène provençale, intérieur lumineux, objet 3D doré ; sinon `assets/generated/*.jpg` ou template sans image), jamais deux fois la même composition de suite.
 - Un dépôt d'Olivier (`inbox`) remplace la proposition de même nature.
+- **Une des trois propositions est une vidéo** de 15 à 30 s (`render/render-video.js`) : photos du bien animées puis carte de fin pour Vente ou Location, image générée animée puis carte pour Actualité. La proposition qui reçoit la vidéo change d'un jour à l'autre. Pas de musique dans le fichier.
 - **Message toujours positif** sur les trois.
 - Sans bien disponible pour Vente ou Location, la routine remplace par une deuxième Actualité d'un autre segment et le dit.
 
