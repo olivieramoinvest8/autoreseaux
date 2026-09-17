@@ -53,7 +53,14 @@
   }
   function fmtLocal(iso) { return iso ? new Date(iso).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : ""; }
   /** Valeur par défaut du sélecteur : demain 11h03 (créneau image AMO), heure locale, au format datetime-local. */
-  function defaultSlot() { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(11, 3, 0, 0); const z = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; }
+  // Créneau proposé par défaut : le prochain créneau AMO libre dans la journée (11h03, puis 18h03), sinon demain 11h03.
+  function defaultSlot() {
+    const now = new Date(); const d = new Date(now);
+    if (now.getHours() < 11 || (now.getHours() === 11 && now.getMinutes() < 3)) d.setHours(11, 3, 0, 0);
+    else if (now.getHours() < 18 || (now.getHours() === 18 && now.getMinutes() < 3)) d.setHours(18, 3, 0, 0);
+    else { d.setDate(d.getDate() + 1); d.setHours(11, 3, 0, 0); }
+    const z = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;
+  }
 
   function renderPost(p) {
     const brand = p.brand || {}; const nets = p.networks && p.networks.length ? p.networks : brand.networks || [];
@@ -64,7 +71,9 @@
       : p.status === "error" ? `<p class="state err">Échec de publication : ${esc(p.error || "cause inconnue")}. Corrigez si besoin, puis relancez.</p>`
       : p.status === "partial" ? `<p class="state err">Publié sur ${esc(Object.keys(p.external_ids || {}).join(", ") || "?")}, échec sur le reste : ${esc(p.error || "cause inconnue")}. « Relancer » ne republie que les réseaux manquants.</p>` : "";
     const vis = p.features && p.features.visual; const lphotos = (p.listing && p.listing.photos) || [];
-    const chosen = vis && vis.data ? [vis.data.photo_main, vis.data.photo_1, vis.data.photo_2, vis.data.photo_3].filter(Boolean) : [];
+    // Photos actuellement dans le visuel : pour un carrousel, la photo de chaque slide (renders[].data.photo) ; sinon les clés partagées.
+    const fromRenders = vis && vis.renders ? vis.renders.filter((r) => r.data && r.data.photo).map((r) => r.data.photo) : [];
+    const chosen = fromRenders.length ? fromRenders : vis && vis.data ? [vis.data.photo_main, vis.data.photo_1, vis.data.photo_2, vis.data.photo_3].filter(Boolean) : [];
     const photoPicker = vis && vis.renders && lphotos.length ? `<details class="photos" ${vis.status === "rendering" ? "open" : ""}>
         <summary>Photos du visuel${vis.status === "rendering" ? " · refabrication en cours…" : vis.status === "error" ? " · échec : " + esc(vis.error || "") : ""}</summary>
         <p class="hint">Cliquez les photos dans l'ordre : la 1re devient la photo principale, les 3 suivantes les vignettes. Puis « Refaire le visuel » (une minute environ).</p>

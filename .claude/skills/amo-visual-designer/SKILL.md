@@ -159,7 +159,7 @@ Présente le visuel avec un court résumé : format retenu (et pourquoi, selon l
 - Ne jamais choisir un format au hasard : le format découle toujours du lieu de publication précisé par Olivier. Si ambigu, demander avant de produire.
 - Si Olivier demande un visuel hors-sujet immobilier pur (ex: communication GPBC, autre association), reste sur la même rigueur de charte/structure/réalisme, mais précise-lui que la charte AMO Invest ne s'applique pas forcément telle quelle — demande quelle identité visuelle utiliser dans ce cas.
 
-## Mode automatisé — amo-social-bot (routines 11h03 / 18h03)
+## Mode automatisé — amo-social-bot (routine amo-image, 8h03)
 
 Quand ce skill est utilisé par une routine de ce dépôt (sans Olivier dans la boucle au moment de la production), les règles ci-dessus restent valables (charte, contraste, mentions légales, textes en français) avec ces adaptations :
 
@@ -167,7 +167,9 @@ Quand ce skill est utilisé par une routine de ce dépôt (sans Olivier dans la 
 - **Variété obligatoire** (règle d'Olivier) : relire `posts.features` des derniers posts de la marque ; ne jamais reprendre le même template et la même variante que le post précédent ; un template ne revient pas avant `regles.rotation_format_posts` posts. Varier aussi l'objet 3D, la place de la photo, le fond, le ton de l'accroche. La charte (couleurs, polices, logo, mentions légales) reste fixe.
 - **Apprentissage** : lire `brands/<slug>/learnings.md` (section « Formats visuels ») avant de choisir ; favoriser ce qui marche sans le figer, et respecter le test de la semaine.
 - **Enregistrer** dans `features` : `format` (template), `variante`, `visuel` (photo réelle / objet 3D / data card / sans image), `accroche`, `cta`, `ia` (ce qui a été généré).
-- **Pas de question à Olivier** pendant le run : le format est fixé par le créneau (11h = feed 1080×1350). En cas de doute sur un sujet, choisir le plus sobre.
+- **Pas de question à Olivier** pendant le run : image feed 1080×1350 (story 1080×1920 en déclinaison). En cas de doute sur un sujet, choisir le plus sobre.
+- **Visuels travaillés** (règle d'Olivier, 17 sept.) : les exemples de référence sont `output/examples/` (affiche annonce, carrousel, pédagogie premium avec objet 3D doré). Pour la proposition Actualité, quand le connecteur Higgsfield est disponible, générer une image photo-réaliste (modèle image de Higgsfield : scène provençale, intérieur lumineux, objet 3D doré sur fond bleu marine, style cohérent avec `assets/generated/maison-or-*.jpg`), la rapatrier avec `render/fetch-media.js` et la poser dans `pedagogie-premium.html` (`object_image`) ou `post-feed.html` (`photo`). Sans Higgsfield : `assets/generated/*.jpg` ou template sans image. Jamais deux fois la même composition de suite ; une image générée ne représente jamais un bien réel.
+- **Recette de refabrication** : `features.visual = { renders: [...], data: {...} }`. Pour un carrousel, chaque entrée de `renders` porte ses propres `data` (photo, caption, label, step…), sinon le tableau de bord ne peut pas changer les photos slide par slide.
 - **Données** : écrire un JSON avec les clés du template (`segment`, `title`, `body`, `cta`, `figure`, `figure_label`, `source`, `localisation`), puis lancer :
   `node render/render-image.js --template templates/post-feed.html --data <fichier.json> --out output/<nom>.png`
 - **Titre** : 3 à 8 mots, il est affiché en majuscules. **Texte** : 2 à 4 phrases courtes sur le feed, 2 phrases sur la data card.

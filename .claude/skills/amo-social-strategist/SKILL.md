@@ -78,3 +78,4 @@ Quand ce skill est utilisé par une routine du dépôt : pas de fichier Word, pa
 - Lire d'abord `brands/<slug>/charte.md`, `brands/<slug>/learnings.md`, `content/calendar.json` et les 30 derniers `posts` (thèmes et `features`).
 - Choisir le sujet par priorité (dépôt d'Olivier > bien nouveau, vente ou location > bien sous offre, vendu ou loué > nouveauté légale ou fiscale vérifiée > autres idées), puis le **format visuel** dans `calendar.json → formats_image` en respectant la rotation : jamais le même template + variante que le post précédent. Varier aussi le type d'accroche.
 - Les statistiques (learnings.md) pondèrent le choix ; elles ne le figent jamais. Un test par semaine, une seule variable.
+- **Trois propositions par run** (règle d'Olivier, 17 sept.) : Vente (carrousel + lien de la fiche), Location, Actualité ; voir `brands/amo-invest/charte.md` § « Trois propositions par jour ». Ton toujours positif : une contrainte devient un conseil ou une occasion.

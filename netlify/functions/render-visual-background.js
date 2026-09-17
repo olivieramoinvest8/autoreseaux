@@ -6,6 +6,8 @@
  *   { renders: [ { template: "templates/annonce-feed.html", target: "media_url", name: "annonce-458-feed" },
  *                { template: "templates/annonce-story.html", target: "extra_media.0", name: "annonce-458-story" } ],
  *     data: { …clés du template, photo_main, photo_1… }, status: "rendering" | "ok" | "error", rendered_at }
+ * Un rendu peut porter ses propres données (renders[i].data), fusionnées par-dessus data : indispensable pour un
+ * carrousel, où chaque slide a sa photo et sa légende.
  * Pour chaque rendu : template + data → JPEG → bucket public « visuels » → mise à jour du post.
  */
 const { supabase, logEvent } = require("./_lib/supabase");
@@ -44,7 +46,8 @@ exports.handler = async (event) => {
     const patch = {};
     const extra = Array.isArray(post.extra_media) ? post.extra_media.map((e) => ({ ...e })) : [];
     for (const r of visual.renders) {
-      const jpeg = await renderJpeg(r.template, visual.data || {});
+      // Données du rendu : les clés communes (visual.data) puis celles propres à ce rendu (r.data : photo d'une slide…).
+      const jpeg = await renderJpeg(r.template, { ...(visual.data || {}), ...(r.data || {}) });
       const key = `${post.brand.slug}/${new Date().toISOString().slice(0, 10)}/${Date.now()}-${(r.name || "visuel").replace(/[^a-z0-9._-]+/gi, "-")}.jpg`;
       const { error } = await db.storage.from("visuels").upload(key, jpeg, { contentType: "image/jpeg", upsert: false });
       if (error) throw new Error(`upload : ${error.message}`);

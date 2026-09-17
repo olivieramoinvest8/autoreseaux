@@ -12,6 +12,7 @@
 const { supabase, logEvent } = require("./_lib/supabase");
 const { json, parseBody, requireDashboard, dashboardUrl } = require("./_lib/http");
 const { approvePost, unschedulePost } = require("./_lib/publish");
+const { photosToRenders } = require("./_lib/visual");
 
 exports.handler = async (event) => {
   const denied = requireDashboard(event);
@@ -60,7 +61,8 @@ exports.handler = async (event) => {
     const photos = Array.isArray(body.photos) ? body.photos.filter((u) => allowed.has(u)) : [];
     if (!photos.length) return json(400, { error: "Choisissez au moins la photo principale parmi les photos du bien" });
     const data = { ...(visual.data || {}), photo_main: photos[0], photo_1: photos[1] || "", photo_2: photos[2] || "", photo_3: photos[3] || "" };
-    const features = { ...post.features, visual: { ...visual, data, status: "rendering", error: null, requested_at: new Date().toISOString() } };
+    const renders = photosToRenders(visual.renders, photos); // carrousel : une photo par slide
+    const features = { ...post.features, visual: { ...visual, data, renders, status: "rendering", error: null, requested_at: new Date().toISOString() } };
     const { error } = await db.from("posts").update({ features }).eq("id", body.id);
     if (error) return json(500, { error: error.message });
     await logEvent("dashboard", "info", "Nouvelles photos choisies, visuel en cours de refabrication", { photos }, body.id);

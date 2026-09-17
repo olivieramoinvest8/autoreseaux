@@ -89,4 +89,23 @@ async function renderJpeg(template, data, { quality = 90 } = {}) {
   }
 }
 
-module.exports = { buildHtml, renderJpeg, root };
+/**
+ * Répartit les photos choisies dans le tableau de bord sur les rendus d'une recette.
+ * photos = [principale, vignette 1, 2, 3]. Chaque rendu peut porter ses propres données (r.data), fusionnées
+ * par-dessus visual.data au moment du rendu : c'est ce qui permet à chaque slide d'un carrousel d'avoir sa photo.
+ *   - carrousel-cover  → data.photo = principale
+ *   - carrousel-photo  → data.photo = vignette 1, 2, 3 dans l'ordre des slides
+ *   - annonce-feed / annonce-story / post-feed / post-story : clés partagées photo_main, photo_1..3 (visual.data)
+ */
+function photosToRenders(renders, photos) {
+  let slide = 0;
+  return (renders || []).map((r) => {
+    const t = String(r.template || "");
+    const data = { ...(r.data || {}) };
+    if (/carrousel-cover/.test(t)) data.photo = photos[0];
+    else if (/carrousel-photo/.test(t)) { slide++; if (photos[slide]) data.photo = photos[slide]; }
+    return { ...r, data };
+  });
+}
+
+module.exports = { buildHtml, renderJpeg, root, photosToRenders };

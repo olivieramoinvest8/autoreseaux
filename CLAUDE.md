@@ -15,7 +15,7 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 
 ## 2. Ce que fait ce dépôt
 
-- AMO : 11h03 et 18h03 (lun-sam) un post image par la routine `amo-image` ; la vidéo verticale de 45 à 60 s remplacera le créneau de 18h03 quand la phase vidéo sera prête.
+- AMO : chaque matin à 8h03 (lun-sam), la routine `amo-image` dépose **trois propositions** de post image : un bien à vendre (ou vendu, sous offre) en carrousel avec le lien de la fiche, un bien à louer, une actualité (loi, conseil, saison, vie de l'agence). Olivier en garde zéro à trois et programme lui-même les heures (11h03 et 18h03 proposées par défaut). Message toujours positif. La vidéo verticale de 45 à 60 s viendra avec la phase vidéo.
 - Tech : lun, mer, ven, une vidéo longue de 4 à 6 min et 3 à 5 extraits verticaux complets en eux-mêmes (jamais de « partie 1/10 »).
 - Basket : montage d'un match dès qu'Olivier en dépose un.
 - Chaque post est validé par Olivier dans le tableau de bord privé (mail « un post est prêt » + lien).
@@ -42,6 +42,7 @@ Stack déjà chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, H
 
 ### Ton
 - Direct, concret, pédagogique. On explique, on ne vend pas.
+- **Toujours positif** (règle d'Olivier, 17 sept.) : jamais d'alarme, de menace ni de ton anxiogène ; une contrainte ou une nouvelle règle se présente comme une occasion ou un conseil utile.
 - **Vouvoiement obligatoire** envers les clients. Le tutoiement est interdit.
 - Signature d'esprit : « vous c'est nous ». Proximité et franc-parler, jamais corporate ni grandiloquent.
 
