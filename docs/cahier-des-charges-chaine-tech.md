@@ -134,9 +134,24 @@ vidéo ; ffmpeg et Playwright gratuits. Le temps d'Olivier : 10 minutes par vid�
 - Épuisement de la matière : huit outils puis les coulisses ; la cadence peut passer à deux par semaine sans nuire.
 - Temps d'Olivier : si l'audio devient une corvée, passer au clone ElevenLabs déclaré.
 
+## 9. Et TikTok ? (question d'Olivier, 23 sept.)
+
+Programme de récompenses TikTok (Creator Rewards), France éligible : **10 000 abonnés et 100 000 vues sur les 30
+derniers jours**, 18 ans, **compte personnel** (pas un compte entreprise), vidéos **originales d'au moins 60 secondes**.
+Revenu : 0,40 à 1,20 $ pour 1 000 vues, soit cinq à dix fois moins que YouTube sur une vidéo longue. Contenu IA :
+l'IA comme outil (script, voix, montage, avatar en appoint) reste éligible si le contenu est original et étiqueté ;
+le contenu entièrement synthétique est déclassé ou exclu.
+
+Lecture : TikTok est plus facile pour **être vu** (l'algorithme pousse les nouveaux comptes, pas besoin d'abonnés pour
+faire des vues), plus difficile pour **être payé** (10 000 abonnés sur un sujet de niche en français, et un revenu
+faible même une fois atteint). YouTube est l'inverse : lent au départ, mais les tutoriels y vivent des années grâce à
+la recherche, et le revenu par vue est bien plus élevé. Décision : les deux réseaux reçoivent les mêmes vidéos,
+**TikTok sert à amener du public vers YouTube**, et la monétisation visée reste celle de YouTube. Le compte TikTok tech
+doit être un compte personnel pour rester éligible plus tard.
+
 ## Sources consultées le 23 septembre 2026
 
 Seuils du Programme Partenaire : air.io (guide 2026), vidiq.com, support.google.com (« YouTube Partner Program overview »),
 stockpil.com (relèvement 2027). Politique contenu inauthentique : techcrunch.com (20 juillet 2026), tubefilter.com
 (13 juillet 2026), lenspov.com, auditsocials.com. Revenus par 1 000 vues en France : digitiz.fr, youdeo.fr, edvido.com,
-judolo.fr, la-communication.fr.
+judolo.fr, la-communication.fr. TikTok : tiktok.com/creator-academy (éligibilité), postlinkapp.com, creatorsagency.co, storrito.com (règles IA), lilachbullock.com.
