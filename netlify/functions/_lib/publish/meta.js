@@ -165,4 +165,4 @@ async function check() {
   return out;
 }
 
-module.exports = { publishFacebook, publishInstagram, refreshPageToken, check };
+module.exports = { publishFacebook, publishInstagram, refreshPageToken, check, graph, pageToken };

@@ -30,6 +30,12 @@ est enregistrée dans claude.ai (Code → Routines) avec le texte de la section 
 
 Le texte enregistré est celui de la routine dans claude.ai ; il reprend les sections 2 et 5 de la charte AMO et ajoute : une des trois propositions est une vidéo (`render/render-video.js`, `--thumb` pour la vignette, type `video`, réseaux facebook + instagram en reel), en rotation d'un jour à l'autre ; `npm install` installe ffmpeg-static ; un seul mail récapitulatif « [AMO Invest] 3 propositions du <date> ». Pour le relire ou le modifier : claude.ai → Code → Routines → amo-image → crayon.
 
+## 3 bis. Mémoire courte et apprentissage (29 sept.)
+
+- La routine lance d'abord `bot-recent --refresh` (relecture d'amoinvest.fr côté serveur), attend 90 s, puis lit sa mémoire courte : posts, annonces, dépôts (dont les « sujets »), mesures et bilan.
+- Le bilan (engagement moyen par format, segment, type ; meilleurs posts) vient de `social.metrics`, relevée chaque nuit par `collect-metrics`. La routine dit dans son résumé ce que les chiffres lui ont fait choisir.
+- Un dépôt « Sujet à traiter » devient la proposition Actualité, après vérification des faits (WebSearch, liens fournis) et avec la source citée.
+
 ## 4. Suivi
 
 - Première semaine : Olivier lit chaque mail, valide ou refuse ; les refus et leurs raisons vont dans

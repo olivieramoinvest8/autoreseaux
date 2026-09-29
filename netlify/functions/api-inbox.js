@@ -1,6 +1,8 @@
 /**
  * GET  /api/api-inbox                  → 50 derniers dépôts
  * POST /api/api-inbox { brand, kind, title, body, data, files:[{name,type,size}], clips:[{category, who, note}] }
+ *      kind « sujet » (29 sept.) : un thème demandé par Olivier (title = sujet, body = angle, data.links = sources) ;
+ *      la routine le traite en priorité comme proposition Actualité, après vérification des faits.
  *      → crée le dépôt et renvoie, pour chaque fichier, une URL d'envoi signée vers le bucket privé « raw ».
  *        Pour un match : « clips » décrit chaque fichier (même ordre) ; la liste est gardée dans inbox.data.clips
  *        et dans la table social.clips (la base de montage), si elle existe.
@@ -25,7 +27,8 @@ exports.handler = async (event) => {
     const b = parseBody(event);
     const { data: brand } = await db.from("brands").select("id").eq("slug", b.brand).maybeSingle();
     if (!brand) return json(400, { error: `marque inconnue : ${b.brand}` });
-    if (!["info", "match", "enregistrement", "bien"].includes(b.kind)) return json(400, { error: "kind invalide" });
+    if (!["info", "match", "enregistrement", "bien", "sujet"].includes(b.kind)) return json(400, { error: "kind invalide" });
+    if (b.kind === "sujet" && !String(b.title || "").trim()) return json(400, { error: "un sujet demandé doit avoir un titre" });
     const stamp = new Date().toISOString().slice(0, 10);
     const files = (b.files || []).map((f, i) => `${b.brand}/${stamp}/${Date.now()}-${i}-${String(f.name || "fichier").replace(/[^\w.\-]+/g, "_")}`);
     let clips = null;

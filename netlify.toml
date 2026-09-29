@@ -14,9 +14,13 @@
   node_bundler = "esbuild"
   included_files = ["brands/**", "templates/*.html", "assets/fonts/**", "assets/brand/logo-amo-invest.png", "render/render-image.js"]
 
-# Lecture d'amoinvest.fr chaque matin a 7h UTC (9h Paris en ete, 8h en hiver).
+# Lecture d'amoinvest.fr trois fois par jour, en UTC : 5h30 (7h30 Paris en ete, avant la routine de 8h03), 10h30 et 15h30.
 [functions."read-listings"]
-  schedule = "0 7 * * *"
+  schedule = "30 5,10,15 * * *"
+
+# Mesures des posts publies (Facebook, Instagram) chaque nuit a 4h UTC.
+[functions."collect-metrics"]
+  schedule = "0 4 * * *"
 
 # Publication des posts programmes : toutes les 10 minutes.
 [functions."publish-scheduled"]

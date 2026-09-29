@@ -37,7 +37,7 @@
   function showTab(name) {
     $$("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === name));
     $$(".tab").forEach((t) => (t.hidden = t.id !== "tab-" + name));
-    ({ posts: loadPosts, deposer: loadInbox, annonces: loadListings, historique: loadHistory }[name] || (() => {}))();
+    ({ posts: loadPosts, deposer: loadInbox, annonces: loadListings, historique: loadHistory, perf: loadPerf }[name] || (() => {}))();
   }
   $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.tab); });
 
@@ -170,20 +170,21 @@
       </div>`).join("");
   }
   function clipMeta() { return $$(".clip-row").map((r) => ({ category: $("[data-clip=category]", r).value, who: $("[data-clip=who]", r).value, note: $("[data-clip=note]", r).value })); }
-  $("#kind").addEventListener("change", (e) => { $("#match-fields").hidden = e.target.value !== "match"; if (e.target.value === "match") $("#inbox-form").brand.value = "basket"; renderClipRows(); });
+  $("#kind").addEventListener("change", (e) => { $("#match-fields").hidden = e.target.value !== "match"; $("#sujet-fields").hidden = e.target.value !== "sujet"; if (e.target.value === "match") $("#inbox-form").brand.value = "basket"; renderClipRows(); });
   $("#inbox-form").files.addEventListener("change", renderClipRows);
   $("#inbox-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target; const fd = new FormData(f); const files = Array.from(f.files.files || []);
     const st = $("#inbox-status"); $("#inbox-submit").disabled = true; st.textContent = "Envoi…";
-    const data = fd.get("kind") === "match" ? { date: fd.get("date") || null, opponent: fd.get("opponent") || null, score_home: fd.get("score_home") ? Number(fd.get("score_home")) : null, score_away: fd.get("score_away") ? Number(fd.get("score_away")) : null, home: fd.get("home") === "on" } : {};
+    const data = fd.get("kind") === "match" ? { date: fd.get("date") || null, opponent: fd.get("opponent") || null, score_home: fd.get("score_home") ? Number(fd.get("score_home")) : null, score_away: fd.get("score_away") ? Number(fd.get("score_away")) : null, home: fd.get("home") === "on" }
+      : fd.get("kind") === "sujet" ? { links: String(fd.get("links") || "").split(/\s+/).filter((u) => /^https?:\/\//.test(u)) } : {};
     try {
       const r = await api("api-inbox", { method: "POST", body: JSON.stringify({ brand: fd.get("brand"), kind: fd.get("kind"), title: fd.get("title"), body: fd.get("body"), data, files: files.map((x) => ({ name: x.name, type: x.type, size: x.size })), clips: fd.get("kind") === "match" ? clipMeta() : undefined }) });
       for (let i = 0; i < files.length; i++) {
         st.textContent = `Fichier ${i + 1} / ${files.length}…`;
         if (!DEMO) { const up = await fetch(r.uploads[i].url, { method: "PUT", headers: { "Content-Type": files[i].type || "application/octet-stream" }, body: files[i] }); if (!up.ok) throw new Error(`fichier ${files[i].name} non envoyé (${up.status})`); }
       }
-      st.textContent = "Déposé. Le robot s'en servira au prochain créneau."; f.reset(); $("#match-fields").hidden = true; $("#clip-rows").hidden = true; loadInbox();
+      st.textContent = "Déposé. Le robot s'en servira au prochain créneau."; f.reset(); $("#match-fields").hidden = true; $("#sujet-fields").hidden = true; $("#clip-rows").hidden = true; loadInbox();
     } catch (err) { st.textContent = "Erreur : " + err.message; }
     $("#inbox-submit").disabled = false;
   });
@@ -191,6 +192,18 @@
     const box = $("#inbox-list");
     try { const { inbox } = await api("api-inbox"); box.innerHTML = inbox.length ? `<div class="tablewrap"><table><tr><th>Date</th><th>Marque</th><th>Type</th><th>Titre</th><th>Fichiers</th><th>État</th></tr>${inbox.map((i) => `<tr><td>${fmtDate(i.created_at)}</td><td>${esc(i.brand && i.brand.name)}</td><td>${esc(i.kind)}</td><td>${esc(i.title)}</td><td>${(i.files || []).length}${i.kind === "match" && i.data && i.data.clips ? " · " + esc(i.data.clips.map((c) => c.category).join(", ")) : ""}</td><td>${esc(i.status)}</td></tr>`).join("")}</table></div>` : '<p class="empty">Aucun dépôt pour l\'instant.</p>'; }
     catch (e) { if (e.message !== "401") box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  }
+
+  // ---------- Performances ----------
+  const n = (v) => (v === null || v === undefined ? "–" : String(v));
+  async function loadPerf() {
+    const bilan = $("#perf-bilan"), box = $("#perf-posts");
+    try {
+      const { posts, bilan: b } = await api("api-metrics");
+      const grp = (title, rows) => rows && rows.length ? `<div class="card"><h3>${title}</h3><div class="tablewrap"><table><tr><th></th><th>Posts</th><th>Engagement moyen</th><th>Portée moyenne</th></tr>${rows.map((r) => `<tr><td>${esc(r.cle)}</td><td>${r.posts}</td><td>${r.engagement_moyen}</td><td>${r.reach_moyen || "–"}</td></tr>`).join("")}</table></div></div>` : "";
+      bilan.innerHTML = b.posts_mesures ? `<p class="hint">${b.posts_mesures} posts mesurés.</p>${grp("Par format", b.par_format)}${grp("Par segment", b.par_segment)}${grp("Image ou vidéo", b.par_type)}` : '<p class="empty">Aucune mesure pour l\'instant : la première relève a lieu la nuit suivant la mise en ligne, puis chaque nuit.</p>';
+      box.innerHTML = posts.length ? `<div class="tablewrap"><table><tr><th>Publié</th><th>Sujet</th><th>Format</th><th>Engagement</th><th>Facebook (j'aime / comm. / partages / portée)</th><th>Instagram (j'aime / comm. / enreg. / portée)</th></tr>${posts.map((p) => { const f = p.mesures.facebook || {}, i = p.mesures.instagram || {}; return `<tr><td>${fmtDate(p.published_at)}</td><td>${esc(p.theme || "")}</td><td>${esc((p.features && p.features.format) || p.type)}</td><td>${n(p.engagement)}</td><td>${p.mesures.facebook ? `${n(f.likes)} / ${n(f.comments)} / ${n(f.shares)} / ${n(f.reach)}` : "–"}</td><td>${p.mesures.instagram ? `${n(i.likes)} / ${n(i.comments)} / ${n(i.saves)} / ${n(i.reach)}` : "–"}</td></tr>`; }).join("")}</table></div>` : '<p class="empty">Aucun post publié sur les 60 derniers jours.</p>';
+    } catch (e) { if (e.message !== "401") bilan.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
   }
 
   // ---------- Annonces ----------
@@ -231,6 +244,7 @@
     ];
     if (path.startsWith("api-posts?status=draft")) return Promise.resolve({ posts });
     if (path.startsWith("api-posts")) return Promise.resolve({ posts: [{ ...posts[0], id: "demo-0", status: "published", theme: "diagnostics avant vente", published_at: new Date(Date.now() - 864e5).toISOString(), external_ids: { facebook: "1", instagram: "2" } }] });
+    if (path.startsWith("api-metrics")) return Promise.resolve({ posts: [{ id: "demo-0", theme: "diagnostics avant vente", type: "image", features: { format: "pédagogie premium" }, published_at: new Date(Date.now() - 3 * 864e5).toISOString(), mesures: { facebook: { likes: 12, comments: 2, shares: 1, reach: 640 }, instagram: { likes: 31, comments: 4, saves: 3, reach: 910 } }, engagement: 53 }], bilan: { posts_mesures: 1, par_format: [{ cle: "pédagogie premium", posts: 1, engagement_moyen: 53, reach_moyen: 1550 }], par_segment: [{ cle: "vendeurs", posts: 1, engagement_moyen: 53, reach_moyen: 1550 }], par_type: [{ cle: "image", posts: 1, engagement_moyen: 53, reach_moyen: 1550 }], meilleurs: [] } });
     if (path.startsWith("api-inbox")) return Promise.resolve({ inbox: [{ created_at: new Date().toISOString(), brand: { name: "Basket" }, kind: "match", title: "Contre Châteaurenard", files: ["a", "b", "c"], status: "nouveau" }], id: "x", uploads: [] });
     if (path.startsWith("api-listings")) return Promise.resolve({ listings: [{ kind: "location", title: "Appartement meublé T3 60 m² avec parking", city: "Châteaurenard", price: 800, dpe: "D", ges: "B", status: "disponible", url: "https://amoinvest.fr/location/1", changed_at: new Date().toISOString() }] });
     if (path.startsWith("api-events")) return Promise.resolve({ events: [{ at: new Date().toISOString(), source: "routine", level: "info", message: "Post image AMO préparé, mail envoyé" }, { at: new Date().toISOString(), source: "netlify", level: "info", message: "Lecture du site : 12 fiches, 1 nouvelle" }] });

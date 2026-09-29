@@ -57,7 +57,7 @@ create index if not exists listings_changed_idx on social.listings (changed_at d
 create table if not exists social.inbox (
   id         uuid primary key default gen_random_uuid(),
   brand_id   uuid not null references social.brands (id),
-  kind       text not null check (kind in ('info', 'match', 'enregistrement', 'bien')),
+  kind       text not null check (kind in ('info', 'match', 'enregistrement', 'bien', 'sujet')),  -- sujet : thème demandé par Olivier (29 sept.)
   title      text,
   body       text,
   files      text[] not null default '{}',                -- chemins dans le bucket raw

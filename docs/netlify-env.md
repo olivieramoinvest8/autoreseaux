@@ -25,3 +25,7 @@ Le jeton Meta est celui de la **page**, obtenu via un utilisateur système du po
 URI de redirection à déclarer :
 - Google : `https://communicationsocial.netlify.app/.netlify/functions/oauth-google`
 - TikTok : `https://communicationsocial.netlify.app/.netlify/functions/oauth-tiktok`
+
+## Droits Meta pour les mesures (29 sept.)
+
+Le jeton de l'utilisateur système `socialbot` publie avec `pages_manage_posts`, `pages_read_engagement`, `pages_show_list`, `instagram_basic`, `instagram_content_publish`. Pour que `collect-metrics` relève aussi la **portée**, les **clics** et les **vues vidéo** (Facebook) et la **portée**, les **enregistrements** et les **partages** (Instagram), régénérer le jeton en cochant en plus **`read_insights`** et **`instagram_manage_insights`**, puis remplacer `META_PAGE_TOKEN` dans Netlify et redéployer. Sans ces droits, la relève garde j'aime, commentaires et partages.
