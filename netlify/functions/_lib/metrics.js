@@ -27,8 +27,14 @@ function insightValue(insights, name) {
 /** Facebook : id de post (page_post) ou id de vidéo. */
 async function facebook(id, isVideo) {
   const out = { likes: null, comments: null, shares: null, views: null, reach: null, clicks: null, raw: {} };
-  const base = await tryGraph(`/${id}`, { fields: "likes.summary(true),comments.summary(true)" + (isVideo ? "" : ",shares") });
-  if (base._error) return { ...out, error: base._error };
+  let base = await tryGraph(`/${id}`, { fields: "likes.summary(true),comments.summary(true)" + (isVideo ? "" : ",shares") });
+  if (base._error && isVideo) {
+    // Une vidéo de page refuse parfois « likes » sur l'objet lui-même (#200) : on lit les compteurs sur les arêtes.
+    const likes = await tryGraph(`/${id}/likes`, { summary: "true", limit: "0" });
+    const comments = await tryGraph(`/${id}/comments`, { summary: "true", limit: "0" });
+    base = { likes: likes._error ? null : likes, comments: comments._error ? null : comments, _partial: base._error };
+    if (likes._error && comments._error) return { ...out, error: base._partial };
+  } else if (base._error) return { ...out, error: base._error };
   out.likes = base.likes && base.likes.summary ? base.likes.summary.total_count : null;
   out.comments = base.comments && base.comments.summary ? base.comments.summary.total_count : null;
   out.shares = base.shares ? base.shares.count : null;

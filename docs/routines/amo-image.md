@@ -36,6 +36,12 @@ Le texte enregistré est celui de la routine dans claude.ai ; il reprend les sec
 - Le bilan (engagement moyen par format, segment, type ; meilleurs posts) vient de `social.metrics`, relevée chaque nuit par `collect-metrics`. La routine dit dans son résumé ce que les chiffres lui ont fait choisir.
 - Un dépôt « Sujet à traiter » devient la proposition Actualité, après vérification des faits (WebSearch, liens fournis) et avec la source citée.
 
+## 3 ter. Panne du 4 et 5 octobre et garde-fous (5 oct.)
+
+- Symptôme : run terminé en 57 s, aucun dépôt, pas de notification. Environnement, variables, dépôt et serveur vérifiés sains par une session de reproduction. Cause la plus probable : la vérification des variables en shell (`${!v}`) refusée par la session comme une lecture de secrets, et arrêt au lieu de continuer.
+- Correctifs : `scripts/check-env.js` (vérification neutre, present/absent) ; consigne « si une étape échoue, continue et signale » ; fonction `check-routine` (lun-sam 9h30 Paris) qui écrit un événement d'erreur si rien n'a été déposé, affiché en bandeau rouge dans Posts prêts.
+- Si cela se reproduit : ouvrir le run dans claude.ai → Code → Routines → amo-image, lire le dernier message, et envisager de choisir un autre modèle dans le sélecteur de la routine (décision d'Olivier).
+
 ## 4. Suivi
 
 - Première semaine : Olivier lit chaque mail, valide ou refuse ; les refus et leurs raisons vont dans

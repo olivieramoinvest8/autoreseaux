@@ -45,10 +45,11 @@
   async function loadPosts() {
     const box = $("#posts"); box.innerHTML = '<p class="empty">Chargement…</p>';
     try {
-      const { posts } = await api("api-posts?status=draft");
+      const { posts, alerte } = await api("api-posts?status=draft");
       $("#badge-posts").textContent = posts.length || "";
-      if (!posts.length) { box.innerHTML = '<p class="empty">Rien à valider, rien de programmé, rien en erreur. Le prochain post arrive au prochain créneau.</p>'; return; }
-      box.innerHTML = posts.map(renderPost).join("");
+      const banner = alerte ? `<p class="state err">${esc(fmtDate(alerte.at))} · ${esc(alerte.message)}</p>` : "";
+      if (!posts.length) { box.innerHTML = banner + '<p class="empty">Rien à valider, rien de programmé, rien en erreur. Le prochain post arrive au prochain créneau.</p>'; return; }
+      box.innerHTML = banner + posts.map(renderPost).join("");
     } catch (e) { if (e.message !== "401") box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
   }
   function fmtLocal(iso) { return iso ? new Date(iso).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : ""; }

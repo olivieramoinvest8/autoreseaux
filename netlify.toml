@@ -18,6 +18,10 @@
 [functions."read-listings"]
   schedule = "30 5,10,15 * * *"
 
+# Garde-fou : la routine amo-image a-t-elle depose ses propositions ? Lun-sam a 7h30 UTC (9h30 Paris en ete).
+[functions."check-routine"]
+  schedule = "30 7 * * 1-6"
+
 # Mesures des posts publies (Facebook, Instagram) chaque nuit a 4h UTC.
 [functions."collect-metrics"]
   schedule = "0 4 * * *"
