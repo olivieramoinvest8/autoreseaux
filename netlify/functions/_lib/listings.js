@@ -198,6 +198,16 @@ function parseDetail(htmlText, url, kind) {
   return data;
 }
 
+/** La fiche répond-elle encore (page de détail du même bien, pas une redirection vers la liste) ? */
+async function stillOnline(url, externalId) {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": "amo-social-bot/1.0 (+https://amoinvest.fr)", Accept: "text/html" }, redirect: "follow" });
+    if (!res.ok) return false;
+    const html = await res.text();
+    return res.url.includes(`/${externalId}-`) && /R[ée]f[ée]rence/i.test(html);
+  } catch { return false; }
+}
+
 /** Parcourt le site et renvoie la liste des fiches extraites. */
 async function crawl({ log = () => {} } = {}) {
   const found = [];
@@ -230,8 +240,9 @@ async function crawl({ log = () => {} } = {}) {
  * « nouveau prix ». Les colonnes posées à la main dans le tableau de bord (manual_status…) ne sont jamais touchées.
  */
 async function syncListings(supabase, { log = () => {}, found: given } = {}) {
+  const runStart = new Date().toISOString();
   const found = given || (await crawl({ log })); // « found » fourni : essais automatiques, sans lecture du site
-  const { data: existing, error } = await supabase.from("listings").select("id, external_id, status, price, raw").eq("source", "site");
+  const { data: existing, error } = await supabase.from("listings").select("id, external_id, status, price, raw, url, last_seen_at").eq("source", "site");
   if (error) throw error;
   const byId = new Map((existing || []).map((r) => [r.external_id, r]));
   const now = new Date().toISOString();
@@ -262,8 +273,13 @@ async function syncListings(supabase, { log = () => {}, found: given } = {}) {
     }
   }
   // Ce qui n'est plus sur le site est marqué retiré (probablement vendu ou loué : le tableau de bord pose la question).
+  // Deux garde-fous (12 nov. : trois lectures simultanées ont retiré à tort un bien encore en ligne) :
+  //  - un bien vu par une autre lecture depuis le début de celle-ci n'est pas retiré ;
+  //  - avant de retirer, on rouvre sa fiche : si elle répond encore, le bien reste en ligne.
   if (!suspicious) for (const [, prev] of byId) {
     if (prev.status === "retire") continue;
+    if (prev.last_seen_at && prev.last_seen_at >= runStart) continue;
+    if (!given && prev.url && (await stillOnline(prev.url, prev.external_id))) { log(`fiche ${prev.external_id} absente des listes mais toujours en ligne : gardée`); continue; }
     const { error: e } = await supabase.from("listings").update({ status: "retire", changed_at: now }).eq("id", prev.id);
     if (!e) result.retires.push({ external_id: prev.external_id });
   }

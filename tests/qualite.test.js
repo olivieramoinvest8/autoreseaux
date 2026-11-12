@@ -304,6 +304,17 @@ const carousel = { id: "p1", type: "image", media_url: "https://x.supabase.co/vi
     assert.strictEqual(l2.raw.prix_precedent, 300000); assert.ok(l2.raw.prix_change_le && l2.changed_at !== "2026-09-01");
     assert.strictEqual(l3.status, "retire");
   });
+  await test("deux lectures simultanées : un bien vu par l'autre lecture n'est pas retiré", async () => {
+    const { syncListings } = require(path.join(LIB, "listings.js"));
+    const t = { listings: [
+      { id: "a", source: "site", external_id: "1", status: "disponible", price: 1, raw: {}, last_seen_at: "2026-01-01T00:00:00Z" },
+      { id: "b", source: "site", external_id: "2", status: "disponible", price: 1, raw: {}, last_seen_at: "2999-01-01T00:00:00Z" },
+    ].concat(Array.from({ length: 10 }, (_, i) => ({ id: "x" + i, source: "site", external_id: "x" + i, status: "disponible", price: 1, raw: {} }))) };
+    db = fakeDb(t);
+    const r = await syncListings(db, { found: Array.from({ length: 10 }, (_, i) => ({ source: "site", external_id: "x" + i, price: 1, status: "disponible", photos: [], raw: {} })) });
+    assert.deepStrictEqual(r.retires.map((x) => x.external_id), ["1"]);
+    assert.strictEqual(t.listings[1].status, "disponible");
+  });
   await test("une lecture presque vide ne retire pas tous les biens", async () => {
     const { syncListings } = require(path.join(LIB, "listings.js"));
     const t = { listings: Array.from({ length: 12 }, (_, i) => ({ id: "u" + i, source: "site", external_id: String(i), status: "disponible", price: 1, raw: {} })) };
