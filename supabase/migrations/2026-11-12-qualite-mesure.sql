@@ -2,6 +2,9 @@
 -- Ajoute ce qu'il faut pour : la vraie référence et la mention DPE exacte, l'état posé à la main (sous offre, vendu,
 -- loué, ne plus proposer), la raison des refus, le suivi des abonnés, et la règle « pas deux fois le même bien en
 -- 30 jours » appliquée par la base elle-même. Rejouable sans risque (if not exists / or replace).
+-- Passée le 12 novembre 2026 via le connecteur Supabase (sections 1 à 3 et 5). La section 4 (ménage des jetons
+-- en double) n'a pas été passée : elle supprime des lignes et demande une confirmation à l'écran ; elle est sans
+-- urgence, le renouvellement hebdomadaire met maintenant à jour la ligne la plus récente.
 
 -- 1. Annonces -----------------------------------------------------------------------------------
 alter table social.listings add column if not exists reference        text;         -- « Référence 443 » lue sur la fiche (≠ external_id, numéro de l'adresse web)
@@ -9,9 +12,12 @@ alter table social.listings add column if not exists dpe_note         text;     
 alter table social.listings add column if not exists manual_status    text;         -- posé par Olivier dans l'onglet Annonces
 alter table social.listings add column if not exists manual_status_at timestamptz;
 alter table social.listings add column if not exists manual_note      text;
-alter table social.listings drop constraint if exists listings_manual_status_check;
-alter table social.listings add constraint listings_manual_status_check
-  check (manual_status is null or manual_status in ('sous_offre', 'vendu', 'loue', 'ne_plus_proposer'));
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'listings_manual_status_check') then
+    alter table social.listings add constraint listings_manual_status_check
+      check (manual_status is null or manual_status in ('sous_offre', 'vendu', 'loue', 'ne_plus_proposer'));
+  end if;
+end $$;
 
 -- 2. Posts : raison du refus (lue par la routine avant chaque création) ----------------------------
 alter table social.posts add column if not exists reject_category text;             -- photos | deja_fait | theme | visuel | video | texte | bien_indisponible | autre
@@ -31,6 +37,7 @@ create table if not exists social.account_stats (
 alter table social.account_stats enable row level security;
 
 -- 4. Jetons : une seule ligne par compte même sans marque (le renouvellement hebdomadaire en créait une par semaine)
+--    NON PASSÉE le 12 novembre (voir l'en-tête). À passer à la main quand Olivier est devant l'écran.
 delete from social.tokens t using social.tokens u
  where t.brand_id is null and u.brand_id is null and t.network = u.network and t.account_id is not distinct from u.account_id
    and t.updated_at < u.updated_at;
@@ -86,6 +93,5 @@ begin
   return new;
 end $$;
 
-drop trigger if exists posts_regle_bien on social.posts;
-create trigger posts_regle_bien before insert on social.posts
+create or replace trigger posts_regle_bien before insert on social.posts
   for each row execute function social.posts_regle_bien();
