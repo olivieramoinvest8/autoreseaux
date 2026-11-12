@@ -2,7 +2,10 @@
  * Publication Facebook (page) et Instagram (compte professionnel) via l'API Graph de Meta.
  * Variables : META_PAGE_ID, META_PAGE_TOKEN (jeton de page longue durée), META_IG_USER_ID.
  * Les médias doivent être accessibles publiquement (bucket Supabase public) : image → photo, vidéo → reel.
- * Non testé tant que l'application Meta n'est pas créée (étape 2 de la phase 1).
+ * Carrousel (12 nov.) : un post qui porte plusieurs images (media_url + extra_media de type « slide ») part en album
+ * sur Facebook et en carrousel sur Instagram, dans l'ordre des slides. Avant, seule la première image partait.
+ * Story : l'image extra_media de type « story » (affiche 1080×1920) est publiée en story après le post, sans jamais
+ * faire échouer la publication principale.
  */
 const GRAPH = "https://graph.facebook.com/v21.0";
 
@@ -72,6 +75,23 @@ async function graph(path, params, method = "POST") {
 
 function isVideo(post) { return post.type !== "image" || /\.(mp4|mov|webm)(\?|$)/i.test(post.media_url || ""); }
 
+const MAX_SLIDES = 10; // limite commune prudente (Instagram accepte 2 à 10 images par carrousel)
+
+/**
+ * Ce qu'il faut publier pour un post image : la liste ordonnée des images (media_url puis les slides) et la story.
+ * extra_media = [{ url, kind }] ; kind « slide » = image suivante du carrousel, « story » = affiche verticale.
+ * Une image marquée « slide » dont le nom contient « story » est traitée en story (anciens dépôts de la routine).
+ */
+function mediaPlan(post) {
+  const extras = Array.isArray(post.extra_media) ? post.extra_media : [];
+  const urlOf = (e) => (typeof e === "string" ? e : e && e.url) || null;
+  const isStory = (e) => (e && e.kind === "story") || /story/i.test(String(urlOf(e) || "").split("/").pop());
+  const slides = extras.filter((e) => !isStory(e) && (typeof e === "string" || !e.kind || e.kind === "slide")).map(urlOf).filter(Boolean);
+  const story = extras.filter(isStory).map(urlOf).filter(Boolean)[0] || null;
+  const images = isVideo(post) ? [] : [post.media_url, ...slides].filter(Boolean).slice(0, MAX_SLIDES);
+  return { images, story, isCarousel: images.length >= 2 };
+}
+
 async function publishFacebook(post) {
   const pageId = process.env.META_PAGE_ID;
   if (!pageId) throw new Error("META_PAGE_ID manquant");
@@ -79,6 +99,17 @@ async function publishFacebook(post) {
   if (isVideo(post)) {
     const r = await graph(`/${pageId}/videos`, { file_url: post.media_url, description: message });
     return { id: r.id, kind: "video" };
+  }
+  const plan = mediaPlan(post);
+  if (plan.isCarousel) {
+    // Album : chaque photo est d'abord déposée sans être publiée, puis un seul post les réunit dans l'ordre.
+    const params = { message };
+    for (const [i, url] of plan.images.entries()) {
+      const ph = await graph(`/${pageId}/photos`, { url, published: "false" });
+      params[`attached_media[${i}]`] = JSON.stringify({ media_fbid: ph.id });
+    }
+    const r = await graph(`/${pageId}/feed`, params);
+    return { id: r.id, kind: "album", images: plan.images.length };
   }
   const r = await graph(`/${pageId}/photos`, { url: post.media_url, message });
   return { id: r.post_id || r.id, kind: "photo" };
@@ -102,19 +133,68 @@ async function publishInstagram(post) {
   if (isVideo(post)) {
     creation = await graph(`/${igId}/media`, { media_type: "REELS", video_url: post.media_url, caption, share_to_feed: "true" });
     await waitContainer(creation.id);
+  } else if (mediaPlan(post).isCarousel) {
+    // Carrousel : un conteneur par image (is_carousel_item), puis un conteneur CAROUSEL qui les réunit avec la légende.
+    const children = [];
+    for (const url of mediaPlan(post).images) {
+      const child = await graph(`/${igId}/media`, { image_url: url, is_carousel_item: "true" });
+      await waitContainer(child.id);
+      children.push(child.id);
+    }
+    creation = await graph(`/${igId}/media`, { media_type: "CAROUSEL", children: children.join(","), caption });
+    await waitContainer(creation.id);
   } else {
     creation = await graph(`/${igId}/media`, { image_url: post.media_url, caption });
     // Instagram télécharge l'image (JPEG public) en arrière-plan : publier avant la fin donne « Media ID is not available ».
     await waitContainer(creation.id);
   }
-  // Même FINISHED, Meta refuse parfois la publication pendant quelques secondes : on réessaie trois fois.
+  const pub = await publishContainer(igId, creation.id, post.media_url);
+  return { id: pub.id, kind: isVideo(post) ? "reel" : mediaPlan(post).isCarousel ? "carousel" : "image", ...(mediaPlan(post).isCarousel ? { images: mediaPlan(post).images.length } : {}) };
+}
+
+/** Même FINISHED, Meta refuse parfois la publication pendant quelques secondes : on réessaie trois fois. */
+async function publishContainer(igId, creationId, label) {
   let pub, lastErr;
   for (let i = 0; i < 4; i++) {
-    try { pub = await graph(`/${igId}/media_publish`, { creation_id: creation.id }); break; }
+    try { pub = await graph(`/${igId}/media_publish`, { creation_id: creationId }); break; }
     catch (e) { lastErr = e; if (!/Media ID is not available/i.test(e.message)) throw e; await new Promise((r) => setTimeout(r, 8000)); }
   }
-  if (!pub) throw new Error(`Instagram : ${lastErr.message} (image ${post.media_url})`);
-  return { id: pub.id, kind: isVideo(post) ? "reel" : "image" };
+  if (!pub) throw new Error(`Instagram : ${lastErr.message} (image ${label})`);
+  return pub;
+}
+
+/** Story Instagram : l'affiche verticale du post. */
+async function publishInstagramStory(imageUrl) {
+  const igId = process.env.META_IG_USER_ID;
+  if (!igId) throw new Error("META_IG_USER_ID manquant");
+  const creation = await graph(`/${igId}/media`, { media_type: "STORIES", image_url: imageUrl });
+  await waitContainer(creation.id);
+  const pub = await publishContainer(igId, creation.id, imageUrl);
+  return { id: pub.id, kind: "story" };
+}
+
+/** Story Facebook de la page : la photo est déposée sans être publiée, puis passée en story. */
+async function publishFacebookStory(imageUrl) {
+  const pageId = process.env.META_PAGE_ID;
+  if (!pageId) throw new Error("META_PAGE_ID manquant");
+  const ph = await graph(`/${pageId}/photos`, { url: imageUrl, published: "false" });
+  const r = await graph(`/${pageId}/photo_stories`, { photo_id: ph.id });
+  return { id: r.post_id || r.id || ph.id, kind: "story" };
+}
+
+/** Nombre d'abonnés de la page et du compte Instagram (droits déjà présents sur le jeton). Un échec donne null. */
+async function accountStats() {
+  const out = [];
+  const { META_PAGE_ID, META_IG_USER_ID } = process.env;
+  if (META_PAGE_ID) {
+    const p = await graph(`/${META_PAGE_ID}`, { fields: "followers_count,fan_count" }, "GET").catch((e) => ({ _error: e.message }));
+    out.push({ network: "facebook", followers: p._error ? null : p.followers_count ?? p.fan_count ?? null, raw: p });
+  }
+  if (META_IG_USER_ID) {
+    const i = await graph(`/${META_IG_USER_ID}`, { fields: "followers_count,media_count" }, "GET").catch((e) => ({ _error: e.message }));
+    out.push({ network: "instagram", followers: i._error ? null : i.followers_count ?? null, raw: i });
+  }
+  return out;
 }
 
 /** Prolonge le jeton de page (60 jours). Appelé par refresh-tokens. */
@@ -158,6 +238,12 @@ async function check() {
       const need = ["pages_manage_posts", "pages_read_engagement", "instagram_basic", "instagram_content_publish"];
       out.details.droits_manquants = need.filter((n) => !(d.scopes || []).includes(n));
       if (out.details.droits_manquants.length) out.ok = false;
+      // Droits des mesures : sans eux on publie normalement, mais la portée et les enregistrements restent vides.
+      const mesure = ["read_insights", "instagram_manage_insights"];
+      out.details.droits_mesure_manquants = mesure.filter((n) => !(d.scopes || []).includes(n));
+      out.details.mesure = out.details.droits_mesure_manquants.length
+        ? `portée non mesurable : cochez ${out.details.droits_mesure_manquants.join(" et ")} en régénérant le jeton de l'utilisateur système`
+        : "droits de mesure présents";
     }
   } catch (e) {
     out.ok = false; out.error = e.message;
@@ -165,4 +251,4 @@ async function check() {
   return out;
 }
 
-module.exports = { publishFacebook, publishInstagram, refreshPageToken, check, graph, pageToken };
+module.exports = { publishFacebook, publishInstagram, publishFacebookStory, publishInstagramStory, mediaPlan, accountStats, refreshPageToken, check, graph, pageToken };

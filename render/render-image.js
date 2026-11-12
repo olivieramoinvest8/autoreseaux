@@ -129,8 +129,7 @@ async function render(opts) {
   );
   fs.writeFileSync(tmpPath, html, "utf8");
 
-  const { chromium } = require("playwright");
-  const browser = await chromium.launch();
+  const browser = await launchChromium();
   try {
     const page = await browser.newPage({ viewport: size, deviceScaleFactor: opts.scale || 1 });
     page.on("pageerror", (e) => console.warn("Erreur dans la page :", e.message));
@@ -152,6 +151,22 @@ async function render(opts) {
   return { outPath, size };
 }
 
+/**
+ * Ouvre Chromium. Playwright cherche d'abord « son » navigateur ; s'il ne le trouve pas (version du paquet différente
+ * de celle installée sur la machine, cas des sessions Claude Code dans le cloud), on prend celui de la machine :
+ * variable CHROMIUM_PATH, sinon /opt/pw-browsers/chromium. Évite l'échec « Executable doesn't exist ».
+ */
+async function launchChromium() {
+  const { chromium } = require("playwright");
+  try {
+    return await chromium.launch();
+  } catch (e) {
+    const candidates = [process.env.CHROMIUM_PATH, "/opt/pw-browsers/chromium"].filter((c) => c && fs.existsSync(c));
+    if (!/Executable doesn't exist/i.test(e.message) || !candidates.length) throw e;
+    return chromium.launch({ executablePath: candidates[0] });
+  }
+}
+
 if (require.main === module) {
   const opts = parseArgs(process.argv.slice(2));
   render(opts)
@@ -164,4 +179,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { render, fillTemplate, readSize };
+module.exports = { render, fillTemplate, readSize, launchChromium };

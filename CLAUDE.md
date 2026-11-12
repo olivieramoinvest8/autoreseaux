@@ -15,7 +15,9 @@ Charte de travail pour Claude Code sur ce dépôt. `BRIEF.md` est la source de v
 
 ## 2. Ce que fait ce dépôt
 
-- AMO : chaque matin à 8h03 (lun-sam), la routine `amo-image` dépose **trois propositions** : un bien à vendre (ou vendu, sous offre) en carrousel avec le lien de la fiche, un bien à louer, une actualité (loi, conseil, saison, vie de l'agence) ; l'une des trois est une vidéo verticale « photos animées » (`render/render-video.js`), à tour de rôle. Olivier en garde zéro à trois et programme lui-même les heures (11h03 et 18h03 proposées par défaut). Message toujours positif. La vidéo verticale de 45 à 60 s viendra avec la phase vidéo.
+- AMO : chaque matin (lun-sam, 8h03 en été, 7h03 en hiver), la routine `amo-image` dépose **trois propositions** : un bien à vendre (ou vendu, sous offre) en carrousel avec le lien de la fiche, un bien à louer, une actualité (loi, conseil, saison, vie de l'agence) ; l'une des deux annonces est une vidéo verticale « photos animées » (`render/render-video.js`), à tour de rôle. Olivier en garde zéro à trois et programme lui-même les heures (11h03 et 18h03 proposées par défaut). Message toujours positif. La vidéo verticale de 45 à 60 s viendra avec la phase vidéo.
+- Un carrousel est publié **en entier** (album Facebook, carrousel Instagram) et l'affiche verticale d'une annonce part en **story** (décochable dans le tableau de bord). Olivier peut décocher un réseau pour un post.
+- Chaque nuit, `collect-metrics` relève abonnés, personnes touchées et réactions ; la routine les lit le matin (`bilan`, `comptes`), avec les refus d'Olivier (`retours`). Texte exact de la routine : `docs/routines/amo-image.md`.
 - Tech : lun, mer, ven, une vidéo longue de 4 à 6 min et 3 à 5 extraits verticaux complets en eux-mêmes (jamais de « partie 1/10 »).
 - Basket : montage d'un match dès qu'Olivier en dépose un.
 - Chaque post est validé par Olivier dans le tableau de bord privé (mail « un post est prêt » + lien).
@@ -59,7 +61,14 @@ Stack déjà chez Olivier : Netlify, Railway, Supabase, Canva, GitHub, Hektor, H
 - Un appel à l'action sobre (« Parlons-en », « Écrivez-nous », « Estimation sur rendez-vous »).
 - Rotation des segments sur la semaine (voir `content/calendar.json`).
 - Jamais deux fois le même thème en 14 jours : relire les 30 derniers `posts` en base avant de choisir.
-- Sur un visuel d'annonce (vente/location) : DPE et GES lisibles, mention des honoraires. Ne jamais inventer ces valeurs. Sans lettre lisible sur la fiche : « DPE en cours » (maison, appartement) ; terrain : « non soumis au DPE ». Un bien sans DPE n'est donc plus écarté.
+- Sur un visuel d'annonce (vente/location) : DPE et GES lisibles, mention des honoraires. Ne jamais inventer ces valeurs. Sans lettre lisible sur la fiche : la mention exacte du site (`dpe_note` : « DPE vierge », « DPE ancienne version », « DPE non concerné », « DPE en cours ») ; terrain : « Non soumis au DPE ». Un bien sans DPE n'est donc plus écarté.
+- **Référence d'un bien** : toujours celle affichée sur la fiche (« Référence 443 », colonne `listings.reference`), jamais le numéro contenu dans l'adresse web.
+- **Photos d'une annonce** : uniquement la liste `photos` du bien fournie par la mémoire (`bot-recent`). Le lecteur du site écarte le bloc « autres biens » ; ne jamais relire une fiche à la main pour y prendre des images.
+- **Pas deux fois le même bien en 30 jours** (14 jours après un refus) : la base refuse le dépôt. Exception : un post d'événement (`features.evenement` : sous offre, vendu, loué, nouveau prix).
+- **Sous offre, vendu, loué** : le site ne l'affiche pas. Olivier le dit dans l'onglet Annonces (« Ce que vous savez ») ; la routine prépare alors un post de fierté sobre, sans prix final.
+- **Deux textes différents** : Facebook raconte et pose une question (lien de la fiche) ; Instagram accroche court avec hashtags locaux (« lien en bio »). Jamais une copie raccourcie.
+- **Variété des visuels d'actualité** : carrousel conseil, photo et texte, chiffre clé, objet 3D (une fois sur six au plus). La mémoire indique les familles à laisser reposer.
+- **Refus d'Olivier** : chaque refus porte un motif ; le lire dans `retours` avant de créer et ne jamais refaire la même erreur.
 
 ### Formats par réseau
 | Réseau | Contrainte |
@@ -100,6 +109,10 @@ npx playwright install chromium  # installe le navigateur de rendu (une seule fo
 npm run test:image               # produit output/post-feed-test.png à partir de l'exemple
 node render/render-image.js --template templates/post-feed.html --data content/examples/post-test.json --out output/mon-post.png
 npm run test:functions          # vérifie la syntaxe des fonctions Netlify
+npm run test:qualite            # 18 essais : carrousel publié en entier, mesure, refus, mémoire de la routine (rien ne sort de la machine)
+node scripts/bot-recent.js --brand amo-invest             # mémoire de la routine : biens présentables, refus, chiffres
+node scripts/bot-recent.js --brand amo-invest --bien 443  # détail d'un bien par sa référence
+node render/render-carousel.js --data content/examples/carrousel-conseil.json --dir output/conseil   # carrousel conseil (5 slides)
 npm run test:listings           # auto-test du lecteur d'annonces amoinvest.fr
 node netlify/functions/_lib/listings.js --dry-run   # lit vraiment le site, n'écrit rien
 node scripts/publish-to-supabase.js --brand amo-invest --asset output/post.png --post content/runs/<date>.json

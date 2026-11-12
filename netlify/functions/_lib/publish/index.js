@@ -110,6 +110,22 @@ async function publishPost(id) {
       await logEvent("netlify", "error", `Échec sur ${network} : ${e.message}`, null, id);
     }
   }
+  // Story : l'affiche verticale du post (extra_media de type « story »), sur les réseaux où le post est parti.
+  // Olivier peut la décocher dans le tableau de bord (features.sans_story). Un échec est noté, jamais bloquant.
+  const plan = meta.mediaPlan(post);
+  if (plan.story && !(post.features && post.features.sans_story)) {
+    for (const [network, publishStory] of [["facebook", meta.publishFacebookStory], ["instagram", meta.publishInstagramStory]]) {
+      const key = `${network}_story`;
+      if (!networks.includes(network) || !external[network] || external[key]) continue;
+      try {
+        const r = await publishStory(plan.story);
+        external[key] = r.id;
+        await logEvent("netlify", "info", `Story publiée sur ${network}`, r, id);
+      } catch (e) {
+        await logEvent("netlify", "warn", `Story non publiée sur ${network} : ${e.message}`, null, id);
+      }
+    }
+  }
   const done = networks.filter((n) => external[n]).length;
   const status = errors.length === 0 ? "published" : done > 0 ? "partial" : "error";
   await db.from("posts").update({ status, external_ids: external, error: errors.join(" | ") || null, published_at: done ? new Date().toISOString() : null }).eq("id", id);

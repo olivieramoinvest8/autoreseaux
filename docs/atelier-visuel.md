@@ -99,3 +99,22 @@ dans le fichier (Olivier l'ajoute dans l'application s'il le souhaite). Dépôt 
 publie en reel Instagram et en vidéo Facebook. Formats : `portrait` 1080×1920 (reel, story ; par défaut), `landscape` 1920×1080 (Facebook, YouTube ; carte de fin `annonce-wide.html`), `feed` 1080×1350. Ajustement `fit` : `blur` par défaut (photo entière, vide comblé par un fond flou de la même photo, jamais de noir ni de recadrage aux deux tiers), `cover` sur demande. Une carte au mauvais format est posée entière sur fond bleu marine. Pas de refabrication depuis le tableau de bord pour la vidéo (v1).
 Premier essai réel : post `d62cd7b0-a720-4ef1-bf0f-4190ce1b0ebd` (duplex 458), déposé le 17 sept.
 
+
+## 9. Carrousel publié en entier, story, carrousel conseil (12 nov.)
+
+- **Carrousel** : un post image qui porte plusieurs images (`media_url` + `extra_media` de type `slide`) est publié en
+  album sur Facebook et en carrousel sur Instagram, dans l'ordre (`netlify/functions/_lib/publish/meta.js`, 10 images
+  au plus). Avant le 12 novembre, seule la première image partait : 22 carrousels ont été publiés avec « Faites défiler »
+  et une seule image. Le tableau de bord montre maintenant toutes les slides.
+- **Story** : l'affiche verticale (`annonce-story.html`, 1080×1920) se dépose avec `--story` ; elle part en story
+  Facebook et Instagram après le post. Olivier peut la décocher. Un échec de story ne fait jamais échouer le post.
+- **Dépôt** : `--asset` la première image, `--extra` les suivantes dans l'ordre, `--story` l'affiche verticale. Une
+  image passée par `--extra` dont le nom contient « story » est traitée en story.
+- **Carrousel conseil** : `templates/conseil-slide.html` (1080×1350) fait la couverture (kicker, title, swipe), les
+  étapes (number, title, body) et la fin (title, body, cta). Variante `variant_clair`. Photo réelle en fond possible
+  (`photo`, voilée de bleu). Exemple : `content/examples/carrousel-conseil.json`, rendu de référence
+  `output/examples/conseil-slide-etape.jpg`. Une idée par slide, 4 ou 5 slides.
+- **Familles de visuels** (comptées par `_lib/feedback.js`) : carrousel annonce, affiche annonce, vidéo photos du bien,
+  carrousel conseil, photo et texte, chiffre clé, pédagogie objet 3D. Mettre l'un de ces noms dans `features.format`.
+- **Navigateur de rendu** : si Playwright ne trouve pas son Chromium, `render-image.js` prend celui de la machine
+  (`CHROMIUM_PATH`, sinon `/opt/pw-browsers/chromium`).

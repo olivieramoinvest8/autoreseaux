@@ -75,3 +75,39 @@ pre.hint { white-space: pre-wrap; word-break: break-word; background: #F4F5FA; b
 .clip-row .name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clip-row select, .clip-row input { margin: 0; }
 @media (max-width: 600px) { .clip-row { grid-template-columns: 1fr 1fr; } .clip-row .name { grid-column: 1 / -1; } }
+
+/* Carrousel complet, story, réseaux (12 nov.) */
+.gal-title { margin: 0 0 6px; }
+.gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; }
+.gallery a { position: relative; flex: 0 0 auto; width: min(62%, 300px); scroll-snap-align: start; border-radius: 6px; overflow: hidden; background: #EBEDF6; }
+.gallery img { display: block; width: 100%; height: auto; }
+.gallery b { position: absolute; right: 6px; top: 6px; padding: 2px 8px; border-radius: 10px; background: rgba(26, 29, 59, .8); color: #fff; font-size: 12px; }
+.story { display: flex; gap: 12px; align-items: center; margin: 10px 0; padding: 8px; border: 1px solid #D6D9E8; border-radius: 6px; }
+.story img { display: block; width: 64px; height: auto; border-radius: 4px; }
+.story label, .nets label { margin: 0; color: var(--ink); }
+.nets { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 12px 0 0; }
+.bien { margin: 0 0 8px; }
+
+/* Refus avec motif */
+.reject-form { margin-top: 12px; padding: 12px; border: 1px dashed var(--err); border-radius: 6px; }
+.reject-form p { margin: 0 0 8px; }
+.reject-form input[type="text"] { width: 100%; margin-top: 10px; padding: 9px; border: 1px solid var(--line); border-radius: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: #fff; color: var(--ink); border: 1px solid var(--line); padding: 8px 12px; font-weight: 500; }
+.chip.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* Annonces : état connu d'Olivier */
+label.etat { margin: 8px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+select[data-etat] { padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); max-width: 240px; text-transform: none; letter-spacing: 0; font-size: 15px; }
+table.biens td:last-child { min-width: 118px; }
+tr.ask-row { background: #FFF7D6; }
+.ask { color: var(--warn); }
+
+/* Performances : abonnés */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+.kpi strong { font-size: 30px; color: var(--navy); line-height: 1.1; }
+.kpi .lab { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.kpi .delta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+tr.faible td { color: var(--muted); }
+.card h3 { margin: 0 0 8px; font-size: 15px; color: var(--navy); }

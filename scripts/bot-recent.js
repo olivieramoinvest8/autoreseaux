@@ -2,6 +2,7 @@
  * Mémoire courte d'une routine : appelle /api/bot-recent du tableau de bord et affiche le JSON.
  * Lancer : node scripts/bot-recent.js --brand amo-invest            (mémoire courte : posts, annonces, dépôts, mesures, bilan)
  *          node scripts/bot-recent.js --brand amo-invest --refresh  (demande d'abord la relecture du site ; attendre ~60 s puis relancer sans --refresh)
+ *          node scripts/bot-recent.js --brand amo-invest --bien 443 (détail complet d'un bien : description, caractéristiques, toutes ses photos)
  * Variables (fichier .env ou environnement) : DASHBOARD_URL, BOT_SECRET. Aucun secret n'est affiché.
  */
 const fs = require("fs");
@@ -21,10 +22,11 @@ async function main() {
   const args = process.argv.slice(2);
   const brand = args[args.indexOf("--brand") + 1] || "amo-invest";
   const refresh = args.includes("--refresh");
+  const bien = args.includes("--bien") ? args[args.indexOf("--bien") + 1] : null;
   const { DASHBOARD_URL, BOT_SECRET } = process.env;
   if (!DASHBOARD_URL || !BOT_SECRET) throw new Error("DASHBOARD_URL ou BOT_SECRET manquant");
   const res = await fetch(`${DASHBOARD_URL.replace(/\/$/, "")}/api/bot-recent`, {
-    method: "POST", headers: { "Content-Type": "application/json", "x-bot-secret": BOT_SECRET }, body: JSON.stringify(refresh ? { brand, refresh: true } : { brand }),
+    method: "POST", headers: { "Content-Type": "application/json", "x-bot-secret": BOT_SECRET }, body: JSON.stringify(refresh ? { brand, refresh: true } : bien ? { brand, bien } : { brand }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`bot-recent : ${data.error || res.status}`);

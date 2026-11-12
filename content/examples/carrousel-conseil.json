@@ -1,0 +1,10 @@
+{
+  "_doc": "Exemple de « carrousel conseil » (12 nov. 2026) : un conseil déroulé en 5 slides, publiées ensemble (album Facebook, carrousel Instagram). Lancer : node render/render-carousel.js --data content/examples/carrousel-conseil.json --dir output/conseil. Puis déposer : --asset la slide 1, --extra les slides 2 à 5, dans l'ordre. Une idée par slide, phrases courtes, vouvoiement, ton positif. Alterner variant_clair d'un carrousel à l'autre.",
+  "slides": [
+    { "template": "templates/conseil-slide.html", "out": "conseil-1.jpg", "data": { "kicker": "Bailleurs", "title": "Avant l'hiver,\ntrois gestes\npour un logement\nserein", "swipe": "Faites défiler", "step": "1/5", "localisation": "AMO Invest · Graveson" } },
+    { "template": "templates/conseil-slide.html", "out": "conseil-2.jpg", "data": { "kicker": "Bailleurs", "number": "1", "title": "La chaudière", "body": "Un entretien annuel par un professionnel.\nGardez l'attestation dans le dossier du logement.", "step": "2/5", "localisation": "AMO Invest · Graveson" } },
+    { "template": "templates/conseil-slide.html", "out": "conseil-3.jpg", "data": { "kicker": "Bailleurs", "number": "2", "title": "La ventilation", "body": "Des bouches d'aération dégagées : moins d'humidité, un logement plus sain.", "step": "3/5", "localisation": "AMO Invest · Graveson" } },
+    { "template": "templates/conseil-slide.html", "out": "conseil-4.jpg", "data": { "kicker": "Bailleurs", "number": "3", "title": "Le dialogue", "body": "Un message simple à votre locataire : qui s'occupe de quoi, et quand.", "step": "4/5", "localisation": "AMO Invest · Graveson" } },
+    { "template": "templates/conseil-slide.html", "out": "conseil-5.jpg", "data": { "kicker": "Bailleurs", "title": "Un doute sur\nvotre logement\nloué ?", "body": "Nous faisons le point avec vous, à Graveson et alentour.", "cta": "Parlons-en", "step": "5/5", "localisation": "AMO Invest · Graveson" } }
+  ]
+}

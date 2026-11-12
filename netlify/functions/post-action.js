@@ -1,7 +1,10 @@
 /**
  * POST /api/post-action  { id, action, texts?: {text_fb,…}, networks?: [], scheduled_at? }
- * - update     : enregistre les textes modifiés dans le tableau de bord
- * - reject     : statut rejected
+ * - update     : enregistre les textes modifiés dans le tableau de bord, les réseaux cochés (networks) et le choix
+ *                « sans story » (sans_story: true|false, rangé dans features)
+ * - reject     : statut rejected, avec le motif (category, obligatoire depuis le 12 nov. : photos, deja_fait, theme,
+ *                visuel, video, texte, bien_indisponible, autre) et une précision libre (reason). La routine les lit
+ *                avant chaque création. « bien_indisponible » marque aussi le bien « ne plus proposer ».
  * - approve    : statut approved puis publication immédiate en arrière-plan (publish-background) ;
  *                accepté aussi depuis error (relance) et approved programmé (« publier maintenant »)
  * - schedule   : statut approved + scheduled_at (ISO, dans le futur) ; publish-scheduled publiera à l'heure
@@ -13,6 +16,7 @@ const { supabase, logEvent } = require("./_lib/supabase");
 const { json, parseBody, requireDashboard, dashboardUrl } = require("./_lib/http");
 const { approvePost, unschedulePost } = require("./_lib/publish");
 const { photosToRenders } = require("./_lib/visual");
+const { REJECT_CATEGORIES } = require("./_lib/feedback");
 
 exports.handler = async (event) => {
   const denied = requireDashboard(event);
@@ -26,15 +30,40 @@ exports.handler = async (event) => {
     const allowed = ["text_fb", "text_ig", "text_tiktok", "text_youtube", "hashtags", "networks"];
     const patch = {};
     for (const k of allowed) if (body[k] !== undefined) patch[k] = body[k];
+    if (Array.isArray(patch.networks)) {
+      patch.networks = patch.networks.filter((n) => ["facebook", "instagram", "youtube", "tiktok"].includes(n));
+      if (!patch.networks.length) return json(400, { error: "Cochez au moins un réseau." });
+    }
+    // On ne note dans le journal que ce qui a vraiment changé (avant : « Textes modifiés » à chaque validation).
+    const { data: before } = await db.from("posts").select("text_fb, text_ig, text_tiktok, text_youtube, hashtags, networks, features, brand:brands(networks)").eq("id", body.id).maybeSingle();
+    if (!before) return json(404, { error: "Post introuvable" });
+    if (!(before.networks || []).length) before.networks = (before.brand && before.brand.networks) || []; // vide = réseaux de la marque
+    const norm = (k, v) => {
+      if (k === "hashtags") return (v || []).map((h) => String(h).replace(/^#/, "")).join(" ");
+      if (k === "networks") return (v || []).slice().sort().join(",");
+      return String(v ?? "").replace(/\r\n/g, "\n").trim();
+    };
+    const LABELS = { text_fb: "texte Facebook", text_ig: "texte Instagram", text_tiktok: "texte TikTok", text_youtube: "texte YouTube", hashtags: "hashtags", networks: "réseaux", features: "story" };
+    for (const k of Object.keys(patch)) if (norm(k, patch[k]) === norm(k, before[k])) delete patch[k];
+    if (body.sans_story !== undefined && !!body.sans_story !== !!(before.features || {}).sans_story) patch.features = { ...(before.features || {}), sans_story: !!body.sans_story };
+    const changed = Object.keys(patch);
+    if (!changed.length) return json(200, { ok: true, changed: [] });
     const { error } = await db.from("posts").update(patch).eq("id", body.id);
     if (error) return json(500, { error: error.message });
-    await logEvent("dashboard", "info", "Textes modifiés", patch, body.id);
-    return json(200, { ok: true });
+    await logEvent("dashboard", "info", `Modifié par Olivier : ${changed.map((k) => LABELS[k] || k).join(", ")}`, { changed }, body.id);
+    return json(200, { ok: true, changed });
   }
   if (body.action === "reject") {
-    const { error } = await db.from("posts").update({ status: "rejected", error: body.reason || null }).eq("id", body.id);
+    const category = body.category && REJECT_CATEGORIES[body.category] ? body.category : null;
+    const reason = String(body.reason || "").trim().slice(0, 500) || null;
+    if (!category && !reason) return json(400, { error: "Choisissez un motif : c'est ce qui permet au robot de s'améliorer." });
+    const { data: post, error } = await db.from("posts").update({ status: "rejected", reject_category: category || "autre", reject_reason: reason, error: reason || REJECT_CATEGORIES[category] }).eq("id", body.id).select("id, listing_id").maybeSingle();
     if (error) return json(500, { error: error.message });
-    await logEvent("dashboard", "info", "Post refusé", { reason: body.reason || null }, body.id);
+    if (!post) return json(404, { error: "Post introuvable" });
+    if (category === "bien_indisponible" && post.listing_id) {
+      await db.from("listings").update({ manual_status: "ne_plus_proposer", manual_status_at: new Date().toISOString(), manual_note: reason }).eq("id", post.listing_id).is("manual_status", null);
+    }
+    await logEvent("dashboard", "info", `Post refusé : ${REJECT_CATEGORIES[category || "autre"]}${reason ? ` (${reason})` : ""}`, { category: category || "autre", reason }, body.id);
     return json(200, { ok: true });
   }
   if (body.action === "approve") {

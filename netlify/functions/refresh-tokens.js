@@ -11,7 +11,12 @@ exports.handler = async () => {
   try {
     const r = await meta.refreshPageToken();
     const expires = r.expires_in ? new Date(Date.now() + r.expires_in * 1000).toISOString() : null;
-    await supabase().from("tokens").upsert({ brand_id: null, network: "meta", account_id: process.env.META_PAGE_ID || "page", data: { access_token: r.access_token }, expires_at: expires, updated_at: new Date().toISOString() }, { onConflict: "brand_id,network,account_id" });
+    // Une seule ligne par compte : sans marque (brand_id vide), « upsert » en créait une nouvelle chaque lundi.
+    const db = supabase(); const account = process.env.META_PAGE_ID || "page";
+    const row = { data: { access_token: r.access_token }, expires_at: expires, updated_at: new Date().toISOString() };
+    const { data: existing } = await db.from("tokens").select("id").eq("network", "meta").eq("account_id", account).is("brand_id", null).order("updated_at", { ascending: false }).limit(1);
+    if (existing && existing[0]) await db.from("tokens").update(row).eq("id", existing[0].id);
+    else await db.from("tokens").insert({ brand_id: null, network: "meta", account_id: account, ...row });
     await logEvent("netlify", "info", "Jeton Meta prolongé", { expires_at: expires });
     return json(200, { ok: true, expires_at: expires });
   } catch (e) {

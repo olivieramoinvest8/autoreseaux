@@ -1,0 +1,98 @@
+<!--
+  templates/conseil-slide.html — Slide d'un « carrousel conseil » AMO Invest, 1080×1350 (feed, 4:5).
+  Créé le 12 novembre 2026 pour varier les visuels d'actualité : au lieu d'une seule image avec un objet doré,
+  un conseil se déroule en 4 ou 5 slides (une idée par slide), publiées ensemble en carrousel.
+
+  Le même template fait les trois rôles, selon les clés données :
+    - couverture : kicker + title + swipe (pas de number)
+    - étape      : number + title + body + step
+    - fin        : title + body + cta + localisation
+
+  Clés :
+    kicker         petit libellé doré en haut ("Bailleurs", "Conseil du jeudi")
+    number         grand chiffre doré de l'étape ("1", "2", "3") ; absent sur la couverture et la fin
+    title          titre en majuscules, 3 lignes au plus (un saut de ligne force la coupure)
+    body           1 à 3 phrases courtes, vouvoiement
+    step           repère en haut à droite ("2/5")
+    swipe          invitation de la couverture ("Faites défiler")
+    cta            appel à l'action sobre de la dernière slide ("Parlons-en")
+    localisation   "AMO Invest · Graveson"
+    photo          photo réelle en fond, voilée de bleu (facultatif ; jamais une photo trouvée sur le web)
+    variant_clair  "1" pour le fond clair (texte bleu marine) : alterner d'un carrousel à l'autre
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="render-size" content="1080x1350">
+<title>AMO Invest — carrousel conseil</title>
+<style>
+  @font-face { font-family: "Oswald"; font-weight: 500; src: url("../assets/fonts/oswald-500.ttf") format("truetype"); }
+  @font-face { font-family: "Oswald"; font-weight: 700; src: url("../assets/fonts/oswald-700.ttf") format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 400; src: url("../assets/fonts/inter-400.ttf")  format("truetype"); }
+  @font-face { font-family: "Inter";  font-weight: 600; src: url("../assets/fonts/inter-600.ttf")  format("truetype"); }
+  :root { --navy: #2E358D; --navy-deep: #1E2464; --gold: #E9CA31; --gold-dark: #E0B21F; --white: #FFFFFF; --pad: 80px;
+          --bg: linear-gradient(165deg, #2E358D 0%, #1E2464 100%); --ink: var(--white); --soft: rgba(255,255,255,.92); --accent: var(--gold); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { position: relative; background: var(--bg); color: var(--ink); font-family: "Inter", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .photo { position: absolute; inset: 0; background: url("{{photo}}") center / cover no-repeat; }
+  .photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(30,36,100,.86) 0%, rgba(30,36,100,.72) 45%, rgba(30,36,100,.93) 100%); }
+
+  /* Diagonales signature : dans le coin bas droit, au-dessus du pied, hors des textes */
+  .diag { position: absolute; inset: 0; pointer-events: none; }
+  .diag .gold  { position: absolute; inset: 0; background: var(--gold); clip-path: polygon(1010px 760px, 1034px 760px, 884px 1150px, 860px 1150px); }
+  .diag .white { position: absolute; inset: 0; background: rgba(255,255,255,.4); clip-path: polygon(1052px 760px, 1064px 760px, 914px 1150px, 902px 1150px); }
+
+  .head { position: absolute; left: var(--pad); right: var(--pad); top: 70px; display: flex; align-items: center; justify-content: space-between; }
+  .kicker { display: flex; align-items: center; gap: 16px; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  .kicker::before { content: ""; width: 56px; height: 4px; background: var(--accent); }
+  .step { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 30px; letter-spacing: .1em; color: var(--ink); border: 2px solid currentColor; padding: 6px 20px; border-radius: 999px; opacity: .85; }
+
+  .main { position: absolute; left: var(--pad); right: 190px; top: 190px; bottom: 260px; display: flex; flex-direction: column; justify-content: center; }
+  .number { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 250px; line-height: .9; color: var(--gold);
+    text-shadow: 0 3px 0 #D9B92A, 0 6px 0 #C9A81F, 0 9px 0 #B5951A, 0 20px 30px rgba(0,0,0,.35); margin-bottom: 26px; }
+  h1 { font-family: "Oswald", sans-serif; font-weight: 700; font-size: 92px; line-height: 1.04; text-transform: uppercase; letter-spacing: .01em; white-space: pre-line; color: var(--ink); }
+  .number + h1 { font-size: 74px; }
+  .body { margin-top: 30px; font-size: 38px; line-height: 1.4; font-weight: 400; color: var(--soft); white-space: pre-line; max-width: 800px; }
+  .swipe { margin-top: 44px; align-self: flex-start; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); border: 2px solid currentColor; padding: 12px 28px; border-radius: 999px; }
+  .cta { margin-top: 40px; align-self: flex-start; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 36px; letter-spacing: .06em; text-transform: uppercase; color: var(--navy-deep); background: var(--gold); padding: 16px 36px; border-radius: 8px; box-shadow: 0 6px 0 var(--gold-dark); }
+
+  .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 190px; background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); border-top: 8px solid var(--gold); }
+  .foot img { height: 124px; width: auto; display: block; }
+  .foot .sign { text-align: right; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 28px; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); }
+  .foot .sign small { display: block; margin-top: 6px; font-family: "Inter", sans-serif; font-weight: 400; font-size: 22px; letter-spacing: 0; text-transform: none; color: #B8901A; }
+</style>
+<!-- Variante claire : fond blanc cassé, texte bleu marine, accents or foncé pour le contraste -->
+<style data-if="variant_clair">
+  :root { --bg: linear-gradient(165deg, #FFFFFF 0%, #EEF0F9 100%); --ink: #2E358D; --soft: #2A2F5E; --accent: #B8901A; }
+  .diag .white { background: rgba(46,53,141,.25); }
+  .foot { background: var(--navy-deep); }
+  .foot .sign { color: var(--white); } .foot .sign small { color: var(--gold); }
+  .foot .logo { background: var(--white); border-radius: 8px; padding: 8px 14px; } .foot img { height: 108px; }
+</style>
+</head>
+<body>
+  <div class="photo" data-if="photo"></div>
+  <div class="diag"><div class="gold"></div><div class="white"></div></div>
+
+  <header class="head">
+    <div class="kicker">{{kicker}}</div>
+    <div class="step" data-if="step">{{step}}</div>
+  </header>
+
+  <section class="main">
+    <div class="number" data-if="number">{{number}}</div>
+    <h1>{{title}}</h1>
+    <p class="body" data-if="body">{{body}}</p>
+    <div class="swipe" data-if="swipe">{{swipe}} →</div>
+    <div class="cta" data-if="cta">{{cta}} →</div>
+  </section>
+
+  <footer class="foot">
+    <div class="logo"><img src="../assets/brand/logo-amo-invest.png" alt="AMO Invest, agence immobilière"></div>
+    <div class="sign">{{localisation}}<small>« vous c'est nous »</small></div>
+  </footer>
+</body>
+</html>

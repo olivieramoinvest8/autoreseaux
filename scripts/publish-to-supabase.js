@@ -15,8 +15,12 @@
  *   - relais : SUPABASE_URL + SUPABASE_ANON_KEY + BOT_SECRET (routines Claude Code, qui ne détiennent pas la clé
  *     service) → tout passe par la fonction Supabase « bot-draft », qui ne sait que déposer des brouillons.
  * Variables lues dans l'environnement ou dans .env : SUPABASE_URL, SUPABASE_SERVICE_KEY | SUPABASE_ANON_KEY + BOT_SECRET, DASHBOARD_URL.
- * Options : --extra fichier.png (répétable) pour les slides d'un carrousel ou les déclinaisons (extra_media) ;
+ * Options : --extra fichier.jpg (répétable, dans l'ordre) pour les slides suivantes d'un carrousel : elles sont
+ *             publiées avec la première image, en album Facebook et en carrousel Instagram ;
+ *           --story fichier.jpg pour l'affiche verticale 1080×1920, publiée en story après le post ;
  *           --thumb vignette.jpg pour une vidéo (thumbnail_url, affichée dans le tableau de bord et envoyée à Meta).
+ * Une annonce est rattachée à son bien par la base (numéro lu dans le lien de la fiche) ; la base refuse le dépôt
+ * d'un bien déjà proposé depuis moins de 30 jours : le message d'erreur le dit, il suffit de choisir un autre bien.
  */
 const fs = require("fs");
 const path = require("path");
@@ -58,25 +62,29 @@ async function uploadViaRelay(brandSlug, filePath) {
   return r.url;
 }
 
-async function mainRelay(brandSlug, assetPath, postPath, extras, thumbPath) {
+/** Une image passée par --extra dont le nom contient « story » est une story, pas une slide de carrousel. */
+function kindOfExtra(file) { return /story/i.test(path.basename(file)) ? "story" : "slide"; }
+
+async function mainRelay(brandSlug, assetPath, postPath, extras, thumbPath, storyPath) {
   const post = JSON.parse(fs.readFileSync(postPath, "utf8"));
   const media_url = assetPath ? await uploadViaRelay(brandSlug, assetPath) : post.media_url || null;
   const thumbnail_url = thumbPath ? await uploadViaRelay(brandSlug, thumbPath) : post.thumbnail_url || null;
   const extra_media = [];
-  for (const f of extras) extra_media.push({ url: await uploadViaRelay(brandSlug, f), kind: "slide" });
+  for (const f of extras) extra_media.push({ url: await uploadViaRelay(brandSlug, f), kind: kindOfExtra(f) });
+  if (storyPath) extra_media.push({ url: await uploadViaRelay(brandSlug, storyPath), kind: "story" });
   const r = await relay("create", { brand: brandSlug, dashboard_url: process.env.DASHBOARD_URL || "", post: { ...post, media_url, thumbnail_url, extra_media: extra_media.length ? extra_media : post.extra_media || [] } });
   console.log(JSON.stringify(r, null, 2));
 }
 
 async function main() {
   loadEnv();
-  const brandSlug = arg("--brand"); const assetPath = arg("--asset"); const postPath = arg("--post"); const extras = args("--extra"); const thumbPath = arg("--thumb");
+  const brandSlug = arg("--brand"); const assetPath = arg("--asset"); const postPath = arg("--post"); const extras = args("--extra"); const thumbPath = arg("--thumb"); const storyPath = arg("--story");
   if (!brandSlug || !postPath) throw new Error("--brand et --post sont requis");
   const { SUPABASE_URL, SUPABASE_SERVICE_KEY, DASHBOARD_URL } = process.env;
   if (!SUPABASE_URL) throw new Error("SUPABASE_URL est requis");
   if (!SUPABASE_SERVICE_KEY) {
     if (!process.env.SUPABASE_ANON_KEY || !process.env.BOT_SECRET) throw new Error("Sans SUPABASE_SERVICE_KEY, il faut SUPABASE_ANON_KEY et BOT_SECRET (mode relais)");
-    return mainRelay(brandSlug, assetPath, postPath, extras, thumbPath);
+    return mainRelay(brandSlug, assetPath, postPath, extras, thumbPath, storyPath);
   }
   const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { db: { schema: "social" }, auth: { persistSession: false } });
 
@@ -103,11 +111,23 @@ async function main() {
     thumbnail_url = db.storage.from("visuels").getPublicUrl(key).data.publicUrl;
   }
 
+  // Slides et story (mode direct) : mêmes règles que le mode relais.
+  const extra_media = Array.isArray(post.extra_media) ? post.extra_media.slice() : [];
+  const uploadImage = async (f, tag) => {
+    const ext = path.extname(f).toLowerCase();
+    const key = `${brandSlug}/${new Date().toISOString().slice(0, 10)}/${Date.now()}-${tag}${ext}`;
+    const { error: e } = await db.storage.from("visuels").upload(key, fs.readFileSync(f), { contentType: ext === ".png" ? "image/png" : "image/jpeg", upsert: false });
+    if (e) throw new Error(`upload ${tag} : ${e.message}`);
+    return db.storage.from("visuels").getPublicUrl(key).data.publicUrl;
+  };
+  for (const [i, f] of extras.entries()) extra_media.push({ url: await uploadImage(f, `slide-${i + 2}`), kind: kindOfExtra(f) });
+  if (storyPath) extra_media.push({ url: await uploadImage(storyPath, "story"), kind: "story" });
+
   const token = crypto.randomBytes(24).toString("base64url");
   const row = {
     brand_id: brand.id, slot: post.slot || "11h", type: post.type || "image", segment: post.segment || null, theme: post.theme || null,
     text_fb: post.text_fb || null, text_ig: post.text_ig || null, text_tiktok: post.text_tiktok || null, text_youtube: post.text_youtube || null,
-    hashtags: post.hashtags || [], media_url, thumbnail_url, extra_media: post.extra_media || [],
+    hashtags: post.hashtags || [], media_url, thumbnail_url, extra_media,
     features: post.features || {}, listing_id: post.listing_id || null, inbox_id: post.inbox_id || null, networks: post.networks || [],
     status: "draft", approval_token: token, token_expires_at: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
   };
