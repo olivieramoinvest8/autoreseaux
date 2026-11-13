@@ -95,3 +95,13 @@ end $$;
 
 create or replace trigger posts_regle_bien before insert on social.posts
   for each row execute function social.posts_regle_bien();
+
+-- 6. Rattrapage (13 nov., à passer quand le connecteur Supabase est de nouveau autorisé) : rattacher à leur bien les
+--    anciens posts d'annonce déposés sans listing_id, pour que la règle des 30 jours et les refus passés comptent.
+--    Constaté le 13 nov. : le studio d'Eyguières (réf. 307) et la maison de Mallemort (réf. 436), refusés les 11 et
+--    12 nov., apparaissaient « présentables » faute de rattachement.
+update social.posts p set listing_id = l.id
+  from social.listings l
+ where p.listing_id is null and l.source = 'site'
+   and l.external_id = substring(coalesce(p.features ->> 'listing_url', '') || ' ' || coalesce(p.text_fb, '')
+                                 from 'amoinvest\.fr/(?:vente|location)/[^/[:space:]]+/[^/[:space:]]+/([0-9]+)-');

@@ -12,6 +12,8 @@
     cta          appel à l'action sobre (ex. "Parlons-en")
     localisation texte du bas à droite (ex. "Graveson · Bouches-du-Rhône")
     bg_image     chemin ou URL d'une image de fond optionnelle (assombrie par un voile bleu)
+    photo_visible "1" : la photo reste bien visible (voile léger en haut, dense seulement sous le texte).
+                 À utiliser pour un post d'événement (sous offre, vendu, loué) : on doit reconnaître le bien.
 -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -56,6 +58,9 @@
     content: ""; position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(46,53,141,.82) 0%, rgba(30,36,100,.94) 100%);
   }
+
+  /* Variante photo_visible : la photo du bien occupe le haut, le voile ne s'épaissit que sous le texte. */
+  /* (bloc ajouté par la feuille data-if plus bas) */
 
   /* Diagonales signature : bande étroite à droite, du haut (x≈1000) au cartouche (x≈720).
      Le texte est limité à 740px de large pour ne jamais la croiser. */
@@ -124,6 +129,12 @@
     font-family: "Oswald", sans-serif; font-weight: 500; font-size: 30px; letter-spacing: .12em; text-transform: uppercase;
   }
   .footer .slogan { margin-top: 8px; font-size: 26px; font-weight: 600; color: var(--gold-dark); }
+</style>
+<style data-if="photo_visible">
+  .bg::after { background: linear-gradient(180deg, rgba(30,36,100,.55) 0%, rgba(30,36,100,.10) 24%, rgba(30,36,100,.10) 40%, rgba(30,36,100,.86) 62%, rgba(30,36,100,.96) 100%); }
+  .content { justify-content: flex-end; padding-bottom: 56px; }
+  .content .cta { margin-top: 40px; }
+  h1, .body { text-shadow: 0 3px 16px rgba(0,0,0,.45); }
 </style>
 </head>
 <body>
