@@ -187,7 +187,13 @@ const carousel = { id: "p1", type: "image", media_url: "https://x.supabase.co/vi
     assert.deepStrictEqual(b.par_format.map((g) => [g.cle, g.posts, g.reach_moyen, g.fiable]), [["vidéo photos du bien", 1, 2000, false], ["carrousel annonce", 5, 400, true]]);
     assert.strictEqual(b.par_format[1].taux_engagement, 0.8);
     assert.strictEqual(b.par_heure[0].cle, "11 h");
-    assert.strictEqual(metrics.summarize(posts, rows.map((r) => ({ ...r, raw: {} }))).portee_mesuree, false);
+    assert.strictEqual(metrics.summarize(posts, rows.map((r) => ({ ...r, raw: {}, views: null }))).portee_mesuree, false);
+  });
+
+  await test("Facebook : une portée à 0 avec des vues est remplacée par les vues", () => {
+    const b = metrics.summarize([{ id: "z", type: "image", features: { format: "carrousel 5 slides" }, published_at: "2026-11-10T10:10:00Z" }],
+      [{ post_id: "z", network: "facebook", measured_at: "2026-11-13T04:00:00Z", likes: 8, shares: 1, views: 2559, raw: { reach: 0 } }]);
+    assert.strictEqual(b.par_format[0].reach_moyen, 2559); assert.strictEqual(b.portee_mesuree, true);
   });
 
   console.log("Retours et variété");

@@ -111,7 +111,18 @@ async function collectPost(post) {
 }
 
 function engagement(m) { return (m.likes || 0) + (m.comments || 0) + (m.shares || 0) + (m.saves || 0); }
-const reachOf = (m) => (typeof m.reach === "number" ? m.reach : m.raw && typeof m.raw.reach === "number" ? m.raw.reach : null);
+/**
+ * Audience d'un post : les personnes touchées si Meta les donne, sinon les vues.
+ * Constaté le 13 nov. : sur les posts photo Facebook, post_total_media_view_unique renvoie 0 alors que post_media_view
+ * compte des centaines de vues. Un 0 accompagné de vues n'est donc pas une vraie portée : on retient les vues.
+ */
+const reachOf = (m) => {
+  const r = typeof m.reach === "number" ? m.reach : m.raw && typeof m.raw.reach === "number" ? m.raw.reach : null;
+  const v = typeof m.views === "number" ? m.views : null;
+  if (r && r > 0) return r;
+  if (v && v > 0) return v;
+  return r;
+};
 
 /** Dernière mesure par (post, réseau) parmi des lignes de social.metrics. */
 function latestByPost(rows) {
